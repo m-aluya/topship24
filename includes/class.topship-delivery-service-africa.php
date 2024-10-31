@@ -44,14 +44,19 @@ class Class_topship_delivery_service_africa{
 
 </div>
 
-<div class="form-group">
+<div class="form-row">
+  <div class="form-group col-md-6 col-lg-6 col-sm-12">
   <label for="phone" class="mb-0">Phone Number *</label>
   <input type="tel" class="form-control" id="phone" placeholder="Enter phone number" required>
 </div>
-<div class="form-group">
+<div class="form-group col-md-6 col-lg-6 col-sm-12">
   <label for="email" class="mb-0">Email Address *</label>
   <input type="email" class="form-control" id="email" placeholder="Enter email address" required>
 </div>
+
+</div>
+
+
 <div class="form-group">
   <label for="address" class="mb-0">Address *</label>
   <input type="text" class="form-control" id="address" placeholder="Enter address" required>
@@ -70,16 +75,20 @@ class Class_topship_delivery_service_africa{
     </select>
   </div>
 </div>
-<div class="form-group">
+<div class="form-row">
+<div class="form-group col-md-6 col-lg-6 col-sm-12">
   <label for="city" class="mb-0">City *</label>
   <select class="form-control" id="city" required>
     <option>Select City</option>
   </select>
 </div>
-<div class="form-group">
+<div class="form-group col-md-6 col-lg-6 col-sm-12">
   <label for="postalCode" class="mb-0">Postal Code (optional)</label>
   <input type="text" class="form-control" id="postalCode" placeholder="Enter postal code">
 </div>
+</div>
+
+
 <div class="form-group">
   <label for="password" class="mb-0">Password *</label>
   <input type="password" class="form-control" id="password" placeholder="Enter password" required>
