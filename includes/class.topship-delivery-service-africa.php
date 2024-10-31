@@ -111,7 +111,7 @@ class Class_topship_delivery_service_africa{
 
   <div class="row">
   <div class="col-md-10 mx-auto p-4">
- 
+  <?php self::render_navigation()  ?>
   <div class="shadow bg-white p-5">
 
 
@@ -155,4 +155,64 @@ class Class_topship_delivery_service_africa{
    </div>
         <?php
     }
+
+
+
+    public static function topship_contact_guide_page(){
+
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+        ?>
+    
+   <div class="container">
+
+  <div class="row">
+  <div class="col-md-10 mx-auto p-4">
+  <?php self::render_navigation()  ?>
+  <div class="shadow bg-white p-5">
+
+
+  <h2 class="mt-5fw-bold mb-5">Contact Us</h2>
+  <form>
+  <div class="form-group">
+    <label for="fullName">Full Name *</label>
+    <input type="text" class="form-control" id="fullName" placeholder="Enter full name" required>
+  </div>
+  <div class="form-group">
+    <label for="phone">Phone Number *</label>
+    <input type="tel" class="form-control" id="phone" placeholder="Enter phone number"  required>
+  </div>
+  <div class="form-group">
+    <label for="email">Email Address *</label>
+    <input type="email" class="form-control" id="email" placeholder="Enter email address"  required>
+  </div>
+  <div class="form-group">
+    <label for="businessName">Business Name *</label>
+    <input type="text" class="form-control" id="businessName" placeholder="Enter business name" required>
+  </div>
+  <div class="form-group">
+    <label for="businessWebsite">Business Website (optional)</label>
+    <input type="url" class="form-control" id="businessWebsite" placeholder="Enter business website">
+  </div>
+  <div class="form-group">
+    <label for="message">Your Message *</label>
+    <textarea class="form-control" id="message" rows="3" placeholder="Enter your message" required></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary w-100">Send Message</button>
+</form>
+                
+                
+               
+           
+    </div>
+  </div>
+
+  </div>
+
+   </div>
+        <?php
+    }
+
+
 }
