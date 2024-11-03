@@ -17,7 +17,7 @@ class Class_topship_delivery_service_africa{
         <?php
     }
 
-    public static function topship_register(){ ?>
+   /* public static function topship_register(){ ?>
  
  <div class="container">
 
@@ -87,9 +87,7 @@ class Class_topship_delivery_service_africa{
 <button type="submit" class="btn btn-primary w-100">Register</button>
 </form>
               
-              
-             
-         
+               
   </div>
 </div>
 
@@ -98,6 +96,109 @@ class Class_topship_delivery_service_africa{
  </div>
 <?php
     }
+*/
+
+public static function topship_register() { ?>
+  <div class="container" id="topship-app">
+      <div class="row">
+          <div class="col-md-10 mx-auto p-4">
+              <?php self::render_navigation(); ?>
+              <div class="shadow-lg bg-white p-5">
+                  <h2 class="mt-5 fw-bold mb-5">Create your Topship account</h2>
+                  <form @submit.prevent="submitForm">
+                      <div class="form-row">
+                          <div class="form-group col-md-6 col-lg-6 col-sm-12">
+                              <label for="firstName" class="mb-0">First Name *</label>
+                              <input type="text" v-model="formData.firstName" class="form-control" placeholder="Stark" required>
+                          </div>
+                          <div class="form-group col-md-6 col-lg-6 col-sm-12">
+                              <label for="lastName" class="mb-0">Last Name *</label>
+                              <input type="text" v-model="formData.lastName" class="form-control" placeholder="Stark" required>
+                          </div>
+                      </div>
+                      <div class="form-group">
+                          <label for="phone" class="mb-0">Phone Number *</label>
+                          <input type="tel" v-model="formData.phone" class="form-control" placeholder="Enter phone number" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="email" class="mb-0">Email Address *</label>
+                          <input type="email" v-model="formData.email" class="form-control" placeholder="Enter email address" required>
+                      </div>
+                      <div class="form-group">
+                          <label for="address" class="mb-0">Address *</label>
+                          <input type="text" v-model="formData.address" class="form-control" placeholder="Enter address" required>
+                      </div>
+                      <div class="form-row">
+                          <div class="form-group col-md-6">
+                              <label for="country" class="mb-0">Country *</label>
+                              <select v-model="formData.country" class="form-control" required>
+                                  <option>Select Country</option>
+                                  <option v-for="country in countries" :value="country">{{ country }}</option>
+                              </select>
+                          </div>
+                          <div class="form-group col-md-6">
+                              <label for="state" class="mb-0">State *</label>
+                              <select v-model="formData.state" class="form-control" required>
+                                  <option>Select State</option>
+                                  <option v-for="state in states" :value="state">{{ state }}</option>
+                              </select>
+                          </div>
+                      </div>
+                      <div class="form-group">
+                          <label for="city" class="mb-0">City *</label>
+                          <select v-model="formData.city" class="form-control" required>
+                              <option>Select City</option>
+                              <option v-for="city in cities" :value="city">{{ city }}</option>
+                          </select>
+                      </div>
+                      <div class="form-group">
+                          <label for="postalCode" class="mb-0">Postal Code (optional)</label>
+                          <input type="text" v-model="formData.postalCode" class="form-control" placeholder="Enter postal code">
+                      </div>
+                      <div class="form-group">
+                          <label for="password" class="mb-0">Password *</label>
+                          <input type="password" v-model="formData.password" class="form-control" placeholder="Enter password" required>
+                      </div>
+                      <button type="submit" class="btn btn-primary w-100">Register</button>
+                  </form>
+              </div>
+          </div>
+      </div>
+  </div>
+  <script>
+      document.addEventListener('DOMContentLoaded', function () {
+          const { createApp } = Vue;
+          createApp({
+              data() {
+                  return {
+                      formData: {
+                          firstName: '',
+                          lastName: '',
+                          phone: '',
+                          email: '',
+                          address: '',
+                          country: '',
+                          state: '',
+                          city: '',
+                          postalCode: '',
+                          password: ''
+                      },
+                      countries: ['USA', 'Canada', 'Nigeria'],  // example list
+                      states: ['Lagos', 'Abuja', 'Kano'],        // example list
+                      cities: ['City1', 'City2', 'City3']        // example list
+                  };
+              },
+              methods: {
+                  submitForm() {
+                      console.log('Form submitted:', this.formData);
+                      // Add your AJAX submission logic here
+                  }
+              }
+          }).mount('#topship-app');
+      });
+  </script>
+<?php
+}
 
 
     public static function topship_contact_us_page(){

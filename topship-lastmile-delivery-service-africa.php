@@ -13,11 +13,20 @@
     exit;
  }
  require_once plugin_dir_path(__FILE__) . 'includes/class.topship-delivery-service-africa.php';
-
+ require_once plugin_dir_path(__FILE__) . 'includes/class.topship-api-service-africa.php';
+ require_once plugin_dir_path(__FILE__) . 'includes/class.topship-db-init-service-africa.php';
+ 
  class topshipLastMileDeliveryServiceAfrica {
      public function __construct() {
          add_action('admin_menu', [$this, 'topship_admin_page_plugin_menu']);
          add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
+         add_action('plugins_loaded', function() {
+            Topship_API_Service_Africa::init();
+        });
+        
+        Topship_Registration_Table::init();
+        Topship_Registration_Table::create_table();
+        //register_activation_hook(__FILE__, ['Topship_Registration_Table', 'create_table']);
      }
  
      public function topship_admin_page_plugin_menu() {
@@ -41,6 +50,7 @@
  
      public function enqueue_admin_scripts($hook) {
          // Load Bootstrap on all plugin admin pages
+         
          if (
              strpos($hook, Class_topship_delivery_service_africa::topshipLink()) !== false ||
              strpos($hook, Class_topship_delivery_service_africa::topshipLink() . '-contact-us') !== false ||
@@ -49,7 +59,10 @@
              // Enqueue Bootstrap CSS and JS
              wp_enqueue_style('bootstrap-css', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css');
              wp_enqueue_script('bootstrap-js', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js', ['jquery'], null, true);
-         }
+        
+            // Enqueue Vue.js 3 globally
+            wp_enqueue_script('vue-js', 'https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js', [], null, true);
+            }
      }
  
      public function topship_contact_us_page_content() {
