@@ -57,12 +57,24 @@
              strpos($hook, Class_topship_delivery_service_africa::topshipLink() . '-guide') !== false
          ) {
              // Enqueue Bootstrap CSS and JS
-             wp_enqueue_style('bootstrap-css', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css');
-             wp_enqueue_script('bootstrap-js', 'https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js', ['jquery'], null, true);
+             wp_enqueue_style('bootstrap-css', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css');
+             wp_enqueue_script('bootstrap-js', 'https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js', ['jquery'], null, false);
         
             // Enqueue Vue.js 3 globally
-            wp_enqueue_script('vue-js', 'https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js', [], null, true);
-            }
+            wp_enqueue_script('vue-js', 'https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.js', [], null, false);
+
+             // Enqueue custom styles and external libraries
+           /*  wp_enqueue_style('uptown-css', plugins_url('css/uptown.css', __FILE__));*/
+             wp_enqueue_style('toastify-css', 'https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css');
+             wp_enqueue_style('font-awesome-css', 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css', [], null);
+
+             // Enqueue custom scripts and external libraries
+             wp_enqueue_script('recaptcha', 'https://www.google.com/recaptcha/api.js', [], null, true);
+             wp_enqueue_script('jquer', 'https://code.jquery.com/jquery-3.7.1.min.js', [], null, false);
+             wp_enqueue_script('toastify-js', 'https://cdn.jsdelivr.net/npm/toastify-js', [], null, true);
+             wp_enqueue_script('axios', 'https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js', [], null, true);
+
+         }
      }
  
      public function topship_contact_us_page_content() {

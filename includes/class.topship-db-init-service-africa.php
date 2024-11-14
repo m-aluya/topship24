@@ -5,7 +5,7 @@ class Topship_Registration_Table {
     private static $table_name;
 
     public static function init() {
-        echo 'hello';
+       // echo 'hello';
         global $wpdb;
         self::$table_name = $wpdb->prefix . 'registrations';
         //die(__FILE__);
@@ -15,11 +15,9 @@ class Topship_Registration_Table {
 
     public static function create_table() {
         global $wpdb;
-       // die('whats up db table');
-        // Ensure dbDelta is loaded
+
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-        // Define the SQL for creating the table
         $sql = "CREATE TABLE " . self::$table_name . " (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             email VARCHAR(255) NOT NULL UNIQUE,

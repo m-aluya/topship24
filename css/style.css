@@ -1,0 +1,125 @@
+.loader {
+    width: 48px;
+    height: 48px;
+    border: 5px solid #FFF;
+    border-bottom-color: #FF3D00;
+    border-radius: 50%;
+    display: inline-block;
+    box-sizing: border-box;
+    animation: rotation 1s linear infinite;
+    color: green;
+}
+
+@keyframes rotation {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+.form-container {
+    padding: 20px; /* Adjust padding as needed */
+    /*background-color: #f8f9fa; */
+    border-radius: 8px; /* Optional: adds rounded corners to the form container */
+    max-width: 600px; /* Optional: constrains the form's maximum width */
+    margin: auto; /* Centers the form container */
+}
+
+.mt-3 {
+    margin-top: 2rem; /* Adjust the value to match Uptown CSS's spacing scale if needed */
+}
+
+.img-fluid {
+    max-width: 100%;
+    height: 3em;
+}
+
+.custom-form {
+    background-color: #fff;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    border-radius: 8px;
+    /* Adjust as needed */
+    margin: 0 auto; /* Center the form */
+}
+
+.custom-form button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.custom-form button:hover {
+    background-color: #45a049;
+}
+
+.center {
+    margin: auto;
+    width: fit-content;
+}
+
+
+.close {
+    padding: 1rem;
+    margin: -1rem -1rem -1rem auto;
+    background-color: transparent;
+    border: 0;
+    cursor: pointer;
+}
+
+
+
+
+
+/* Backdrop styles */
+/*
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+}*/
+
+.imgdev{
+    text-align: right;
+}
+@media only screen and (max-width: 768px) {
+    .rotate-90 {
+        transform: rotate(150deg);
+        display: inline-block; /* Ensures the image is rotated in place */
+
+    }
+    .imgdev{
+        text-align: center;
+    }
+}
+.required:after {
+    content: '*';
+    color: red; /* Change the color to suit your design */
+    margin-left: 5px; /* Space between the label and the asterisk */
+}
+.optional:after {
+    content: '(optional)';
+    color: grey; /* Change the color to suit your design */
+    margin-left: 5px; /* Space between the label and the optional text */
+    font-size: 0.9em; /* Adjust the font size if needed */
+}
+.divider{
+    margin-top: 2.5rem;
+    margin-bottom: 2.5rem;
+}
+.warning-info{
+    color: #c76803;
+}
+.mt--5{
+    position: relative;
+    top: -15px;
+}
