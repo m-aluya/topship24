@@ -37,6 +37,14 @@
              Class_topship_delivery_service_africa::topshipLink(),
              [$this, 'topship_admin_page_content']
          );
+         add_submenu_page(
+            Class_topship_delivery_service_africa::topshipLink(),
+            'Topship Guide',
+            'Guide',
+            'manage_options',
+            Class_topship_delivery_service_africa::topshipLink() . '-guide',
+            [$this, 'topship_guide_page']
+        );
  
          add_submenu_page(
              Class_topship_delivery_service_africa::topshipLink(),
@@ -46,6 +54,9 @@
              Class_topship_delivery_service_africa::topshipLink() . '-contact-us',
              [$this, 'topship_contact_us_page_content']
          );
+
+
+
      }
  
      public function enqueue_admin_scripts($hook) {

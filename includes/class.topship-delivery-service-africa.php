@@ -122,7 +122,7 @@ class Class_topship_delivery_service_africa{
                         </div>
                         <div class="col-md-7">
                             <form @submit.prevent="registration" class="form form-container custom-form" id="reg">
-                                <div class="row">
+                                <div class="row my-3">
                                     <div class="form-group col-md-6 col-lg-6 col-sm-12">
                                         <label for="firstName" class="mb-0">First Name *</label>
                                         <input type="text" class="form-control" v-model="data.firstName" id="firstName" placeholder="Stark" required>
@@ -132,11 +132,11 @@ class Class_topship_delivery_service_africa{
                                         <input type="text" class="form-control" v-model="data.lastName" id="lastName" placeholder="Stark" required>
                                     </div>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group my-3">
                                     <label for="phone" class="mb-0">Phone Number *</label>
                                     <input type="tel" class="form-control" v-model="data.phoneNumber" id="phone" placeholder="Enter phone number" required>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group my-3">
                                     <label for="email" class="mb-0">Email Address *</label>
                                     <input type="email" class="form-control" v-model="data.email" id="email" placeholder="Enter email address" required>
                                 </div>
@@ -144,8 +144,8 @@ class Class_topship_delivery_service_africa{
                                     <label for="address" class="mb-0">Address *</label>
                                     <input type="text" class="form-control" v-model="data.address" id="address" placeholder="Enter address" required>
                                 </div>
-                                <div class="row">
-                                    <div class="form-group col-md-6">
+                                <div class="row my-3">
+                                    <div class="form-group">
                                         <label for="country" class="mb-0">Country *  <loader :loading="load.country"/></label>
                                         <select class="form-control" v-model="country" @change="countrySelect" id="country" required>
                                             <option value="">Select Country </option>
@@ -154,14 +154,14 @@ class Class_topship_delivery_service_africa{
                                             </option>
                                         </select>
                                     </div>
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-6 my-3">
                                         <label for="state" class="mb-0">State * <loader :loading="load.state"/> </label>
                                         <select class="form-control" v-model="stateSelected" @change="getCities" id="state" required>
                                             <option v-for="(item,index) in stateList" :value="item.name" :key="index">{{item.name}}</option>
                                         </select>
                                     </div>
                                 </div>
-                                <div class="row">
+                                <div class="row my-3">
                                     <div class="form-group col-md-6">
                                         <label for="city" class="mb-0">City * <loader :loading="load.city"/></label>
                                         <select class="form-control" v-model="citySelected" id="city" required>
@@ -174,7 +174,7 @@ class Class_topship_delivery_service_africa{
                                     </div>
                                 </div>
 
-                                <div class="form-group">
+                                <div class="form-group my-3">
                                     <label for="password" class="mb-0">Password *</label>
                                     <input type="password" class="form-control" v-model="data.password" id="password" placeholder="Enter password" required>
                                 </div>
@@ -389,6 +389,73 @@ class Class_topship_delivery_service_africa{
         }
 
 
+
+
+
+public static function topship_guide_page(){
+
+    if (!current_user_can('manage_options')) {
+        return;
+    }
+    ?>
+
+<div class="container">
+
+<div class="row">
+<div class="col-md-10 mx-auto p-4">
+<?php self::render_navigation()  ?>
+<div class="shadow bg-white p-5">
+
+
+<h2 class="mt-5fw-bold mb-5">Contact Us</h2>
+<form>
+<div class="form-group my-3">
+<label for="fullName">Full Name *</label>
+<input type="text" class="form-control" id="fullName" placeholder="Enter full name" required>
+</div>
+<div class="form-group my-3">
+<label for="phone">Phone Number *</label>
+<input type="tel" class="form-control" id="phone" placeholder="Enter phone number"  required>
+</div>
+<div class="form-group my-3">
+<label for="email">Email Address *</label>
+<input type="email" class="form-control" id="email" placeholder="Enter email address"  required>
+</div>
+<div class="form-group my-3">
+<label for="businessName">Business Name *</label>
+<input type="text" class="form-control" id="businessName" placeholder="Enter business name" required>
+</div>
+<div class="form-group my-3">
+<label for="businessWebsite">Business Website (optional)</label>
+<input type="url" class="form-control" id="businessWebsite" placeholder="Enter business website">
+</div>
+<div class="form-group my-3">
+<label for="message">Your Message *</label>
+<textarea class="form-control" id="message" rows="3" placeholder="Enter your message" required></textarea>
+</div>
+<button type="submit" class="btn btn-primary w-100">Send Message</button>
+</form>
+            
+            
+           
+       
+</div>
+</div>
+
+</div>
+
+</div>
+    <?php
+}
+
+
+
+
+
+
+
+
+
 public static function topship_contact_us_page(){
 
         if (!current_user_can('manage_options')) {
@@ -406,27 +473,27 @@ public static function topship_contact_us_page(){
 
   <h2 class="mt-5fw-bold mb-5">Contact Us</h2>
   <form>
-  <div class="form-group">
+  <div class="form-group my-3">
     <label for="fullName">Full Name *</label>
     <input type="text" class="form-control" id="fullName" placeholder="Enter full name" required>
   </div>
-  <div class="form-group">
+  <div class="form-group my-3">
     <label for="phone">Phone Number *</label>
     <input type="tel" class="form-control" id="phone" placeholder="Enter phone number"  required>
   </div>
-  <div class="form-group">
+  <div class="form-group my-3">
     <label for="email">Email Address *</label>
     <input type="email" class="form-control" id="email" placeholder="Enter email address"  required>
   </div>
-  <div class="form-group">
+  <div class="form-group my-3">
     <label for="businessName">Business Name *</label>
     <input type="text" class="form-control" id="businessName" placeholder="Enter business name" required>
   </div>
-  <div class="form-group">
+  <div class="form-group my-3">
     <label for="businessWebsite">Business Website (optional)</label>
     <input type="url" class="form-control" id="businessWebsite" placeholder="Enter business website">
   </div>
-  <div class="form-group">
+  <div class="form-group my-3">
     <label for="message">Your Message *</label>
     <textarea class="form-control" id="message" rows="3" placeholder="Enter your message" required></textarea>
   </div>
@@ -447,61 +514,8 @@ public static function topship_contact_us_page(){
 
 
 
-    public static function topship_contact_guide_page(){
-
-        if (!current_user_can('manage_options')) {
-            return;
-        }
-        ?>
-    
-   <div class="container">
-
-  <div class="row">
-  <div class="col-md-10 mx-auto p-4">
-  <?php self::render_navigation()  ?>
-  <div class="shadow bg-white p-5">
 
 
-  <h2 class="mt-5fw-bold mb-5">Contact Us</h2>
-  <form>
-  <div class="form-group">
-    <label for="fullName">Full Name *</label>
-    <input type="text" class="form-control" id="fullName" placeholder="Enter full name" required>
-  </div>
-  <div class="form-group">
-    <label for="phone">Phone Number *</label>
-    <input type="tel" class="form-control" id="phone" placeholder="Enter phone number"  required>
-  </div>
-  <div class="form-group">
-    <label for="email">Email Address *</label>
-    <input type="email" class="form-control" id="email" placeholder="Enter email address"  required>
-  </div>
-  <div class="form-group">
-    <label for="businessName">Business Name *</label>
-    <input type="text" class="form-control" id="businessName" placeholder="Enter business name" required>
-  </div>
-  <div class="form-group">
-    <label for="businessWebsite">Business Website (optional)</label>
-    <input type="url" class="form-control" id="businessWebsite" placeholder="Enter business website">
-  </div>
-  <div class="form-group">
-    <label for="message">Your Message *</label>
-    <textarea class="form-control" id="message" rows="3" placeholder="Enter your message" required></textarea>
-  </div>
-  <button type="submit" class="btn btn-primary w-100">Send Message</button>
-</form>
-                
-                
-               
-           
-    </div>
-  </div>
-
-  </div>
-
-   </div>
-        <?php
-    }
 
 
 }
