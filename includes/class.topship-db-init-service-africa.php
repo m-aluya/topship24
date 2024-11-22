@@ -20,7 +20,7 @@ class Topship_Registration_Table {
 
         $sql = "CREATE TABLE " . self::$table_name . " (
             id BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-            email VARCHAR(255) NOT NULL UNIQUE,
+            email VARCHAR(255) NOT NULL,
             password VARCHAR(255) NOT NULL,
             phoneNumber VARCHAR(50) NOT NULL,
             fullName VARCHAR(255) NOT NULL,

@@ -15,9 +15,22 @@
  require_once plugin_dir_path(__FILE__) . 'includes/class.topship-delivery-service-africa.php';
  require_once plugin_dir_path(__FILE__) . 'includes/class.topship-api-service-africa.php';
  require_once plugin_dir_path(__FILE__) . 'includes/class.topship-db-init-service-africa.php';
- 
+ //require_once plugin_dir_path(__FILE__) . 'includes/shipping_rate.php';
+
+
+
  class topshipLastMileDeliveryServiceAfrica {
      public function __construct() {
+        add_action('wp_ajax_andaf', [$this, 'andaf']);
+       // add_action('wp_ajax_nopriv_adaf', 'andaf');
+        //wp_enqueue_jquery();
+        
+        
+        
+        //add_action('woocommerce_cart_calculate_fees', [$this,'andaf']);
+        add_filter('woocommerce_shipping_methods', [$this,'andaf']);
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_topship_shipping_scripts']);
+       
          add_action('admin_menu', [$this, 'topship_admin_page_plugin_menu']);
          add_action('admin_enqueue_scripts', [$this, 'enqueue_admin_scripts']);
          add_action('plugins_loaded', function() {
@@ -87,6 +100,67 @@
 
          }
      }
+
+
+     public function enqueue_topship_shipping_scripts() {
+        // Check if we are on a WooCommerce page (cart, checkout, etc.)
+        if (is_cart() || is_checkout()) {
+       
+            wp_enqueue_script(
+                'topship-shipping', 
+             
+                plugins_url('js/topship-shipping.js', __FILE__),
+                array('jquery'), 
+                '1.0.0', 
+                true
+            );
+        
+            // Localize the script with new data
+            wp_localize_script(
+                'topship-shipping',
+                'topship_rate_object',
+                array(
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce' => wp_create_nonce('shipping_rate_nonce')
+                )
+            );
+
+
+            // wp_enqueue_script(
+            //     'topship-shipping-script', // Handle
+            //     plugins_url('js/topship-shipping.js', __FILE__), // Path to your JS file
+            //     ['jquery'], // Dependencies
+            //     null, // Version
+            //     true // Load in footer
+            // );
+
+            // wp_localize_script(
+            //     'topship-shipping',
+            //     'ajax_object',
+            //     array(
+            //         'ajax_url' => admin_url('admin-ajax.php'),
+            //         'nonce' => wp_create_nonce('shipping_rate_nonce')
+            //     )
+            // );
+
+
+
+        }
+    }
+
+
+    public function andaf(){
+        global $woocommerce;
+    
+        $shipping_rate = 450; 
+        $carttotal = WC()->cart->subtotal;
+        WC()->cart->add_fee('Shipping Cost', $shipping_rate);
+        echo $carttotal;
+    }
+
+
+
+     
  
      public function topship_contact_us_page_content() {
          Class_topship_delivery_service_africa::topship_contact_us_page();
@@ -106,6 +180,68 @@
          $stored_value = get_option('my_field_name', '');
          Class_topship_delivery_service_africa::topship_register();
      }
+
+
+
+
+
+     
+     
  }
  
  new topshipLastMileDeliveryServiceAfrica();
+
+
+// Hook into WordPress to enqueue the shipping script
+// function enqueue_shipping_script() {
+//     // Enqueue the custom script
+//     wp_enqueue_script('custom-shipping-script', plugin_dir_url(__FILE__) . 'js/topship-shipping.js', array('jquery'), '1.0', true);
+
+//     // Localize the script with the AJAX URL
+//     wp_localize_script(
+//         'custom-shipping-script',
+//      'ajax_object', array(
+//     'ajax_url' => admin_url('admin-ajax.php'),
+//     ));
+// }
+
+// Load the script only on WooCommerce checkout or cart pages
+// function enqueue_script_on_woocommerce_pages() {
+//     if (is_checkout() || is_cart()) {
+//         enqueue_shipping_script();
+//     }
+// }
+// add_action('wp_enqueue_scripts', 'enqueue_script_on_woocommerce_pages');
+
+
+
+
+function fetch_shipping_rate() {
+    try {
+      // Retrieve input data
+      $state = sanitize_text_field($_POST['state']);
+      $city = sanitize_text_field($_POST['city']);
+      $address = sanitize_text_field($_POST['address']);
+      $country = sanitize_text_field($_POST['country']);
+      $postcode = sanitize_text_field($_POST['postcode']);
+  
+      // Calculate shipping rate (example logic)
+      $shipping_rate = rand(1000,6000);
+      return $shipping_rate;
+     //code...
+    } catch (\Throwable $th) {
+     //throw $th;
+     $filePath = "my_error.txt";
+     $fileHandle = fopen($filePath, "w");
+     fwrite($fileHandle,$th->getMessage());
+     
+    }
+ }
+ 
+ add_action('wp_ajax_fetch_shipping_rate', 'fetch_shipping_rate');
+ add_action('wp_ajax_nopriv_fetch_shipping_rate', 'fetch_shipping_rate');
+
+
+ function andrex(){
+    return 40;
+ }

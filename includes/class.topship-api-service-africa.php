@@ -332,4 +332,33 @@ class Topship_API_Service_Africa {
     }
 
 
+
+    public static function fetch_shipping_rate($address, $package_details) {
+        // $api_url = 'https://api.topship.africa/shipping-rate'; // Replace with the actual API endpoint
+        // $api_key = 'your-api-key'; // Replace with the actual API key
+    
+        // $response = wp_remote_post($api_url, [
+        //     'headers' => [
+        //         'Authorization' => "Bearer $api_key",
+        //         'Content-Type' => 'application/json',
+        //     ],
+        //     'body' => json_encode([
+        //         'address' => $address,
+        //         'package_details' => $package_details,
+        //     ]),
+        // ]);
+    
+        // if (is_wp_error($response)) {
+        //     return false; // Handle error appropriately
+        // }
+    
+        // $response_body = json_decode(wp_remote_retrieve_body($response), true);
+    
+       // return $response_body['shipping_rate'] ?? false;
+       return 500;
+    }
+    
+
+
+
 }
