@@ -28,7 +28,7 @@
         
         
         //add_action('woocommerce_cart_calculate_fees', [$this,'andaf']);
-        add_filter('woocommerce_shipping_methods', [$this,'andaf']);
+       
         add_action('wp_enqueue_scripts', [$this, 'enqueue_topship_shipping_scripts']);
        
          add_action('admin_menu', [$this, 'topship_admin_page_plugin_menu']);
@@ -149,7 +149,8 @@
     }
 
 
-    public function andaf(){
+    public function andaf($package){
+        //this is where you will implement the logic to get rate.
         global $woocommerce;
     
         $shipping_rate = 450; 
