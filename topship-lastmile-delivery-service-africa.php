@@ -149,14 +149,36 @@
     }
 
 
-    public function andaf($package){
+    public function andaf(){
         //this is where you will implement the logic to get rate.
+        $state = isset($_POST['state']) ? sanitize_text_field($_POST['state']) : '';
+        $city = isset($_POST['city']) ? sanitize_text_field($_POST['city']) : '';
+        $address = isset($_POST['address']) ? sanitize_text_field($_POST['address']) : '';
+        $country = isset($_POST['country']) ? sanitize_text_field($_POST['country']) : '';
+        $postcode = isset($_POST['postcode']) ? sanitize_text_field($_POST['postcode']) : '';
+    
+
+
+
+
         global $woocommerce;
     
         $shipping_rate = 450; 
-        $carttotal = WC()->cart->subtotal;
-        WC()->cart->add_fee('Shipping Cost', $shipping_rate);
-        echo $carttotal;
+      
+        $shipping_name = 'Express Shipping';
+        $shipping_rate = 15.00;
+        WC()->session->set('custom_shipping_rate', [
+            'name' => $shipping_name,
+            'rate' => $shipping_rate,
+        ]);
+
+
+
+
+
+
+        //echo json_encode($_POST);
+        wp_send_json($address);
     }
 
 

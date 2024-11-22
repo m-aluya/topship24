@@ -26,7 +26,8 @@ jQuery(function($) {
             },
             success: function(response) {
              console.log(response);
-             $('body').trigger('update_checkout');
+            // $('body').trigger('update_checkout');
+             $(document.body).trigger('update_checkout');
            
             },
             error: function(xhr, status, error) {
