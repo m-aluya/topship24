@@ -6,6 +6,7 @@ class Class_topship_delivery_service_africa{
     public static function topshipLink(){
         return 'topship-africa-admin-page-01-ba5e0604-954d-4d49-b43e-61ac97f3eb75';
     }
+
     private static function render_navigation() {
         ?>
         <nav class="nav-tab-wrapper">
@@ -16,6 +17,166 @@ class Class_topship_delivery_service_africa{
         </nav>
         <?php
     }
+
+     public static function topship_dashboard() {
+        ?>
+         <div class="container">
+             <div class="row">
+                 <div class="col-md-12 mx-auto p-4">
+                     <?php self::render_navigation(); ?>
+                     <?php
+                     wp_enqueue_style('uptown-css', plugins_url('../css/style.css', __FILE__));
+                     wp_enqueue_script('my-plugin-js', plugin_dir_url(__FILE__) . '../js/my-plugin.js', ['vue-js'], null, true);
+                     ?>
+                     <div class="shadow bg-white p-5">
+                         <div id="app">
+                             <order-component></order-component>
+                         </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+         <script>
+             document.addEventListener('DOMContentLoaded', function () {
+                 // Define the Vue app
+                 var app = Vue.createApp({
+                     data() {
+                         return {
+                             orders: [],
+                             selectedOrder: null,
+                             load: {
+                                 fetchingOrders: false,
+                                 orderDetails: false
+                             },
+                             message: { title: '', message: '', show: false },
+                             show: false
+                         };
+                     },
+                     methods: {
+                         async fetchOrders() {
+                             this.load.fetchingOrders = true;
+                             try {
+                                 const response = await fetch('<?php echo esc_url(home_url('/wp-json/topship/v1/orders')); ?>');
+                                 if (!response.ok) throw new Error('Failed to fetch orders');
+                                 this.orders = await response.json();
+                             } catch (error) {
+                                 this.showMessage('Error', 'Failed to fetch orders. Please try again later.');
+                             } finally {
+                                 this.load.fetchingOrders = false;
+                             }
+                         },
+                         async viewOrderDetails(orderId) {
+                             this.load.orderDetails = true;
+                             try {
+                                 const response = await fetch(`<?php echo esc_url(home_url('/wp-json/topship/v1/orders/')); ?>${orderId}`);
+                                 if (!response.ok) throw new Error('Failed to fetch order details');
+                                 this.selectedOrder = await response.json();
+                             } catch (error) {
+                                 this.showMessage('Error', 'Failed to fetch order details. Please try again later.');
+                             } finally {
+                                 this.load.orderDetails = false;
+                             }
+                         },
+                         showMessage(title, message) {
+                             this.message.title = title;
+                             this.message.message = message;
+                             this.message.show = true;
+                         },
+                         hideMessage() {
+                             this.message.show = false;
+                         }
+                     },
+                     mounted() {
+                         this.fetchOrders();
+                     }
+                 });
+
+                 // Define the OrderComponent
+                 app.component('order-component', {
+                     template: `
+            <div>
+                <h1>Your Orders</h1>
+                <div v-if="load.fetchingOrders" class="loading-spinner">Loading...</div>
+                <ul v-else>
+                    <li v-for="order in orders" :key="order.id">
+                        <button @click="viewOrderDetails(order.id)">
+                            Order #{{ order.id }} - {{ order.date }}
+                        </button>
+                    </li>
+                </ul>
+
+                <div v-if="selectedOrder">
+                    <h2>Order Details</h2>
+                    <p>Order ID: {{ selectedOrder.id }}</p>
+                    <p>Date: {{ selectedOrder.date }}</p>
+                    <p>Status: {{ selectedOrder.status }}</p>
+                    <ul>
+                        <li v-for="item in selectedOrder.items" :key="item.id">
+                            {{ item.name }} - {{ item.quantity }}
+                        </li>
+                    </ul>
+                </div>
+
+                <mess :title="message.title" :message="message.message" :show="message.show" @closed="hideMessage" />
+            </div>
+        `,
+                     data() {
+                         return {
+                             orders: [],
+                             selectedOrder: null,
+                             load: {
+                                 fetchingOrders: false,
+                                 orderDetails: false
+                             },
+                             message: { title: '', message: '', show: false }
+                         };
+                     },
+                     methods: {
+                         async fetchOrders() {
+                             this.load.fetchingOrders = true;
+                             try {
+                                 const response = await fetch('<?php echo esc_url(home_url('/wp-json/topship/v1/orders')); ?>');
+                                 if (!response.ok) throw new Error('Failed to fetch orders');
+                                 this.orders = await response.json();
+                             } catch (error) {
+                                 this.showMessage('Error', 'Failed to fetch orders. Please try again later.');
+                             } finally {
+                                 this.load.fetchingOrders = false;
+                             }
+                         },
+                         async viewOrderDetails(orderId) {
+                             this.load.orderDetails = true;
+                             try {
+                                 const response = await fetch(`<?php echo esc_url(home_url('/wp-json/topship/v1/orders/')); ?>${orderId}`);
+                                 if (!response.ok) throw new Error('Failed to fetch order details');
+                                 this.selectedOrder = await response.json();
+                             } catch (error) {
+                                 this.showMessage('Error', 'Failed to fetch order details. Please try again later.');
+                             } finally {
+                                 this.load.orderDetails = false;
+                             }
+                         },
+                         showMessage(title, message) {
+                             this.message.title = title;
+                             this.message.message = message;
+                             this.message.show = true;
+                         },
+                         hideMessage() {
+                             this.message.show = false;
+                         }
+                     },
+                     mounted() {
+                         this.fetchOrders();
+                     }
+                 });
+
+                 // Mount the app
+                 app.mount('#app');
+             });
+         </script>
+
+         <?php
+     }
 
     public static function topship_register() { ?>
         <div class="container">
@@ -390,10 +551,7 @@ class Class_topship_delivery_service_africa{
 
 
 
-
-
 public static function topship_guide_page(){
-
     if (!current_user_can('manage_options')) {
         return;
     }
@@ -405,7 +563,6 @@ public static function topship_guide_page(){
 <div class="col-md-10 mx-auto p-4">
 <?php self::render_navigation()  ?>
 <div class="shadow bg-white p-5">
-
 
 <h2 class="mt-5fw-bold mb-5">Contact Us</h2>
 <form>

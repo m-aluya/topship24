@@ -30,6 +30,7 @@
      }
  
      public function topship_admin_page_plugin_menu() {
+
          add_menu_page(
              'Create your Topship account',
              'Topship',
@@ -37,6 +38,16 @@
              Class_topship_delivery_service_africa::topshipLink(),
              [$this, 'topship_admin_page_content']
          );
+
+         add_submenu_page(
+             Class_topship_delivery_service_africa::topshipLink(),
+             'Topship Guide',
+             'Guide',
+             'manage_options',
+             Class_topship_delivery_service_africa::topshipLink() . '-register',
+             [$this, 'topship_dashboard_page_content']
+         );
+
          add_submenu_page(
             Class_topship_delivery_service_africa::topshipLink(),
             'Topship Guide',
@@ -54,8 +65,6 @@
              Class_topship_delivery_service_africa::topshipLink() . '-contact-us',
              [$this, 'topship_contact_us_page_content']
          );
-
-
 
      }
  
@@ -87,7 +96,11 @@
 
          }
      }
- 
+
+
+     public function topship_dashboard_page_content() {
+         Class_topship_delivery_service_africa::topship_dashboard();
+     }
      public function topship_contact_us_page_content() {
          Class_topship_delivery_service_africa::topship_contact_us_page();
      }
