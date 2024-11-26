@@ -306,7 +306,7 @@ class Class_topship_delivery_service_africa{
                                     <input type="text" class="form-control" v-model="data.address" id="address" placeholder="Enter address" required>
                                 </div>
                                 <div class="row my-3">
-                                    <div class="form-group">
+                                    <div class="form-group col-md-6 my-3">
                                         <label for="country" class="mb-0">Country *  <loader :loading="load.country"/></label>
                                         <select class="form-control" v-model="country" @change="countrySelect" id="country" required>
                                             <option value="">Select Country </option>
@@ -330,7 +330,7 @@ class Class_topship_delivery_service_africa{
                                         </select>
                                     </div>
                                     <div class="form-group col-md-6">
-                                         <label class="mb-0" for="zipcode">Postal Code</label>
+                                         <label class="mb-0" for="zipcode">Postal Code *</label>
                                          <input v-model="data.zipcode" type="text"  id="zipcode" name="zipcode" required class="form-control">
                                     </div>
                                 </div>
@@ -343,17 +343,17 @@ class Class_topship_delivery_service_africa{
                 <div class="mt-3" style="text-align: center">
                 <div id="recaptcha-container" class="g-recaptcha center" style="margin-top: 0rem;" data-sitekey="6Leu53UnAAAAAAJj75YNK0bBMD-3v1lS8oQN8fi7" data-callback="onSubmit"></div>
 
-<div class="secondary center" style="padding-left: 5rem;padding-right: 5rem;padding-top: 2rem;">
-                        <p class="mt-3" style="text-align: center;">
-                            By clicking Register, I acknowledge that I have read, understand and agree to the Topship’s <a href="https://ship.topship.africa/terms">Privacy Policy</a> and <a href="https://ship.topship.africa/terms">Terms of Service</a>
-                        </p>
-                    </div>
+                                <div class="secondary center" style="padding-left: 5rem;padding-right: 5rem;padding-top: 2rem;">
+                                    <p class="mt-3" style="text-align: center;">
+                                        By clicking Register, I acknowledge that I have read, understand and agree to the Topship’s <a href="https://ship.topship.africa/terms">Privacy Policy</a> and <a href="https://ship.topship.africa/terms">Terms of Service</a>
+                                    </p>
+                                </div>
 
                                 <button type="submit" class="btn btn-primary mt-3">
                                     <span v-if="load.register">Loading...</span>
                                     <span v-else>Register</span>
                                 </button>
-                                </div>
+                             </div>
 
                         <dial :show="show"/>
                       <mess :title="message.title" :message="message.message" :show="message.show"  @closed="closed"/>
