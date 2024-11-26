@@ -34,7 +34,7 @@ class topshipLastMileDeliveryServiceAfrica {
 
         add_action('woocommerce_shipping_init', [$this, 'init_shipping_method']);
         add_filter('woocommerce_shipping_methods', [$this, 'add_shipping_method']);
-
+        add_filter( 'woocommerce_checkout_fields', [$this,'make_postcode_compulsory'] );
 
         add_action('wp_enqueue_scripts', [$this, 'enqueue_topship_shipping_scripts']);
 
@@ -189,6 +189,23 @@ class topshipLastMileDeliveryServiceAfrica {
 
         }
     }
+
+
+  
+
+    function make_postcode_compulsory( $fields ) {
+        if ( isset( $fields['billing']['billing_postcode'] ) ) {
+            $fields['billing']['billing_postcode']['required'] = true; // Make the billing postcode required
+        }
+    
+        if ( isset( $fields['shipping']['shipping_postcode'] ) ) {
+            $fields['shipping']['shipping_postcode']['required'] = true; // Make the shipping postcode required
+        }
+    
+        return $fields;
+    }
+
+
 
 
     public function andaf($cart){
