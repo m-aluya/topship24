@@ -38,7 +38,7 @@ class Topship_API_Service_Africa {
     }
     public static function handle_registration($request) {
         $params = $request->get_json_params();
-
+        error_log(json_encode($params));
         // Validate and sanitize inputs
         $first_name = sanitize_text_field($params['firstName'] ?? '');
         $last_name = sanitize_text_field($params['lastName'] ?? '');
@@ -48,9 +48,10 @@ class Topship_API_Service_Africa {
         $country = sanitize_text_field($params['country'] ?? '');
         $state = sanitize_text_field($params['state'] ?? '');
         $city = sanitize_text_field($params['city'] ?? '');
-        $postal_code = sanitize_text_field($params['postalCode'] ?? '');
+        $postal_code = sanitize_text_field($params['zipcode'] ?? '');
         $password = sanitize_text_field($params['password'] ?? '');
         $recaptchaToken=sanitize_text_field($params['recaptchaToken'] ?? '');
+        $countryCode=sanitize_text_field($params['country_code'] ?? '');
 
         // Prepare data to send to Topship API
         $formData = [
@@ -65,6 +66,7 @@ class Topship_API_Service_Africa {
             'postalCode' => $postal_code,
             'password' => $password,
             'recaptchaToken'=>$recaptchaToken,
+            'country_code'=>$countryCode,
         ];
 
         $formData = [
@@ -127,6 +129,7 @@ class Topship_API_Service_Africa {
                 'city' => $city,
                 'address' => $address,
                 'zipcode' => $postal_code,
+                'country_code'=>$countryCode,
             ]);
 
             return new WP_REST_Response([
