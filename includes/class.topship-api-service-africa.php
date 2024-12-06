@@ -1,5 +1,6 @@
 <?php
-
+require_once plugin_dir_path(__FILE__) . 'class.topship-db-init-service-africa.php';
+require_once plugin_dir_path(__FILE__) . 'class.topship-helper.php';
 class Topship_API_Service_Africa {
 
     public static function init() {
@@ -9,10 +10,28 @@ class Topship_API_Service_Africa {
     public static function register_routes() {
         // Register the route for registration
         //die('say hello');
+
         register_rest_route('topship/v1', '/register', [
             'methods' => 'POST',
             'callback' => [self::class, 'handle_registration'],
             'permission_callback' => '__return_true', // Adjust permissions as needed
+        ]);
+        /*register_rest_route('topship/v1', '/order', [
+            'methods' => 'POST',
+            'callback' => [self::class, 'handle_orders'],
+            'permission_callback' => '__return_true', // Adjust permissions as needed
+        ]);*/
+
+        register_rest_route('topship/v1', '/order', [
+            'methods' => 'POST',
+            'callback' => [self::class, 'handle_orders'],
+            'permission_callback' => '__return_true', // Adjust as needed
+        ]);
+
+        register_rest_route('topship/v1', '/payforbooking', [
+            'methods' => 'POST',
+            'callback' => [self::class, 'handle_payment'],
+            'permission_callback' => '__return_true', // Adjust as needed
         ]);
 
         // Register route to get countries
@@ -35,7 +54,41 @@ class Topship_API_Service_Africa {
             'callback' => [self::class, 'get_cities'],
             'permission_callback' => '__return_true',
         ]);
+
+        register_rest_route('topship/v1', '/pending', [
+            'methods' => 'GET',
+            'callback' => [self::class, 'get_pending'],
+            'permission_callback' => '__return_true',
+        ]);
+
     }
+
+    public static function get_pending(){
+        return Shopify_Shipments_Table::get_all_shipments();
+    }
+    public static function handle_payment( $request) {
+        // Get JSON parameters from the request
+        $params = $request->get_json_params();
+
+        // Sanitize the booking ID
+        $bookingId = sanitize_text_field($params['bookingId'] ?? '');
+
+        // Authenticate and retrieve a token
+        $token = Class_Topship_Helper::login();
+
+        // Process the payment from wallet
+        $result = Shipment_Bookings_Table::pay_from_wallet($bookingId, $token);
+
+        if ($result) {
+            // Return a successful JSON response
+            return new \WP_REST_Response($result, 200);
+        } else {
+            // Return an error JSON response
+            return new \WP_REST_Response(['message' => 'Payment failed'], 500);
+        }
+    }
+
+
     public static function handle_registration($request) {
         $params = $request->get_json_params();
         error_log(json_encode($params));
@@ -144,6 +197,33 @@ class Topship_API_Service_Africa {
             ], 400);
         }
     }
+
+
+    public static function handle_orders($request) {
+        // Extract parameters from the request
+        $per_page = $request->get_param('per_page') ?: 10; // Default to 10 items per page
+        $page = $request->get_param('page') ?: 1; // Default to page 1
+
+        // Fetch all bookings
+        $bookings = ShipmentBookingsTable::get_bookings();
+
+        // Paginate the results
+        $total = count($bookings);
+        $offset = ($page - 1) * $per_page;
+        $paginated_bookings = array_slice($bookings, $offset, $per_page);
+
+        // Build the response
+        return [
+            'data' => $paginated_bookings,
+            'meta' => [
+                'total' => $total,
+                'per_page' => $per_page,
+                'current_page' => $page,
+                'last_page' => ceil($total / $per_page),
+            ]
+        ];
+    }
+
 
 //    public static function handle_registration($request) {
 //        $params = $request->get_json_params();
