@@ -10,7 +10,11 @@ class Shopify_Shipments_Table {
         // Hook to run the table creation on plugin activation
         register_activation_hook(__FILE__, [self::class, 'create_table']);
     }
-
+    public static function table_exists() {
+        global $wpdb;
+        self::init();
+        return $wpdb->get_var("SHOW TABLES LIKE '" . self::$table_name . "'") === self::$table_name;
+    }
     public static function create_table() {
         self::init();
         global $wpdb;
@@ -154,6 +158,11 @@ class Topship_Registration_Table {
         // Hook to run the table creation on plugin activation
        // register_activation_hook(__FILE__, [self::class, 'create_table']);
     }
+    public static function table_exists() {
+        global $wpdb;
+        self::init();
+        return $wpdb->get_var("SHOW TABLES LIKE '" . self::$table_name . "'") === self::$table_name;
+    }
 
     public static function create_table() {
         self::init();
@@ -209,6 +218,12 @@ class Topship_Shipment_Bookings_Table {
         // Hook to run the table creation on plugin activation
         register_activation_hook(__FILE__, [self::class, 'create_table']);
     }
+    public static function table_exists() {
+        global $wpdb;
+        self::init();
+        return $wpdb->get_var("SHOW TABLES LIKE '" . self::$table_name . "'") === self::$table_name;
+    }
+
 
     public static function create_table() {
         self::init();
@@ -253,6 +268,12 @@ class ValueAddedTaxes_Table {
 
         // Hook to run the table creation on plugin activation
         register_activation_hook(__FILE__, [self::class, 'create_table']);
+    }
+
+    public static function table_exists() {
+        global $wpdb;
+        self::init();
+        return $wpdb->get_var("SHOW TABLES LIKE '" . self::$table_name . "'") === self::$table_name;
     }
 
     public static function create_table() {
@@ -444,6 +465,12 @@ class Access_Tokens_Table {
         register_deactivation_hook(__FILE__, [self::class, 'delete_table']);
     }
 
+    public static function table_exists() {
+        global $wpdb;
+        self::init();
+        return $wpdb->get_var("SHOW TABLES LIKE '" . self::$table_name . "'") === self::$table_name;
+    }
+
     /**
      * Create the `access_tokens` table
      */
@@ -493,6 +520,12 @@ class ShipmentBookingsTable {
 
         // Hook to run the table creation on plugin activation
        // register_activation_hook(__FILE__, [self::class, 'create_table']);
+    }
+
+    public static function table_exists() {
+        global $wpdb;
+        self::init();
+        return $wpdb->get_var("SHOW TABLES LIKE '" . self::$table_name . "'") === self::$table_name;
     }
 
     /**
@@ -670,4 +703,43 @@ class ShipmentBookingsTable {
     }
 
 }
+
+class TableManager {
+    public static function initialize_tables() {
+        // Check and initialize Topship_Registration_Table
+        Shopify_Shipments_Table::init();
+        if (!Shopify_Shipments_Table::table_exists()) {
+            Shopify_Shipments_Table::create_table();
+        }
+
+        Topship_Registration_Table::init();
+        if (!Topship_Registration_Table::table_exists()) {
+            Topship_Registration_Table::create_table();
+        }
+
+        Topship_Shipment_Bookings_Table::init();
+        if (!Topship_Shipment_Bookings_Table::table_exists()) {
+            Topship_Shipment_Bookings_Table::create_table();
+        }
+
+        // Check and initialize ValueAddedTaxes_Table
+        ValueAddedTaxes_Table::init();
+        if (!ValueAddedTaxes_Table::table_exists()) {
+            ValueAddedTaxes_Table::create_table();
+        }
+
+        // Check and initialize ShipmentBookingsTable
+        Access_Tokens_Table::init();
+        if (!Access_Tokens_Table::table_exists()) {
+            Access_Tokens_Table::create_table();
+        }
+
+        // Check and initialize Shopify_Shipments_Table
+        ShipmentBookingsTable::init();
+        if (!ShipmentBookingsTable::table_exists()) {
+            ShipmentBookingsTable::create_table();
+        }
+    }
+}
+
 

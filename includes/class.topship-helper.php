@@ -158,7 +158,6 @@ class Class_topship_helper{
             // Return valid token
             return $access_token->token;
         }*/
-
         // Decrypt the password (if encrypted)
         $decrypted_password = self::decrypt($registration['password']);
 
@@ -206,6 +205,47 @@ class Class_topship_helper{
             return null;
         }
     }
+
+    public static function loginWithDetails($email,$password) {
+        global $wpdb;
+
+        // Build the login URL
+        $url = self::$TOPSHIP_BASE_URL . '/login';
+
+        // Prepare the payload for the login request
+        $payload = [
+            'loginInput' => [
+                'email' =>$email,
+                'password' =>$password,
+            ],
+        ];
+
+        try {
+            // Make the API request using wp_remote_post
+            $response = wp_remote_post($url, [
+                'headers' => ['Content-Type' => 'application/json'],
+                'body' => wp_json_encode($payload),
+                'timeout' => 45,
+            ]);
+
+            if (is_wp_error($response)) {
+                throw new Exception($response->get_error_message());
+            }
+
+            $response_body = wp_remote_retrieve_body($response);
+            $res = json_decode($response_body, true);
+
+            if (isset($res['accessToken'])) {
+                return $res['accessToken'];
+            }
+
+            return null; // Login failed
+        } catch (Exception $e) {
+            error_log('Topship login error: ' . $e->getMessage());
+            return null;
+        }
+    }
+
 
     public static function buildPayload($items, $valueAddedMData, $price, $shippingAddress, $customer, $reg, $shippingLine, $valueAddedTax)
     {

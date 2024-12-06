@@ -61,6 +61,126 @@ class Topship_API_Service_Africa {
             'permission_callback' => '__return_true',
         ]);
 
+        register_rest_route('topship/v1', '/retry', [
+            'methods' => 'GET',
+            'callback' => [self::class, 'retry'],
+            'permission_callback' => '__return_true',
+        ]);
+
+        register_rest_route('topship/v1', '/contact', [
+            'methods' => 'POST',
+            'callback' => 'handle_tps_contact_form',
+            'permission_callback' => '__return_true',
+        ]);
+    }
+
+
+
+    public  static function handle_tps_contact_form(WP_REST_Request $request) {
+        $params = $request->get_json_params();
+
+        // Validate input
+        $required_fields = ['fullName', 'email', 'phone', 'name', 'message'];
+        foreach ($required_fields as $field) {
+            if (empty($params[$field])) {
+                return new WP_REST_Response([
+                    'status' => 'error',
+                    'message' => "The field '{$field}' is required."
+                ], 400);
+            }
+        }
+
+        // Sanitize inputs
+        $fullName = sanitize_text_field($params['fullName']);
+        $email = sanitize_email($params['email']);
+        $phone = sanitize_text_field($params['phone']);
+        $businessName = sanitize_text_field($params['name']);
+        $website = isset($params['website']) ? esc_url_raw($params['website']) : '';
+        $message = sanitize_textarea_field($params['message']);
+
+        // Email content
+        $subject = "New Contact Form Submission: {$fullName}";
+        $body = "You have received a new contact form submission:\n\n"
+            . "Full Name: {$fullName}\n"
+            . "Email: {$email}\n"
+            . "Phone: {$phone}\n"
+            . "Business Name: {$businessName}\n"
+            . "Website: {$website}\n\n"
+            . "Message:\n{$message}";
+        $headers = ['Content-Type: text/plain; charset=UTF-8'];
+
+        // Send email
+        $sent = wp_mail('hello@topship.com', $subject, $body, $headers);
+
+        if ($sent) {
+            return new WP_REST_Response([
+                'status' => 'success',
+                'message' => 'Your message has been sent successfully.'
+            ], 200);
+        } else {
+            return new WP_REST_Response([
+                'status' => 'error',
+                'message' => 'There was an error sending your message. Please try again later.'
+            ], 500);
+        }
+    }
+
+
+    public static function retry() {
+        // Fetch all unbooked shipments
+        $shipments = Shopify_Shipments_Table::get_all_shipments();
+
+        if (empty($shipments)) {
+            return new WP_REST_Response(['message' => 'No pending shipments to retry.'], 200);
+        }
+
+        // Authenticate to retrieve token
+        $token = Class_topship_helper::login();
+        if (!$token) {
+            return new WP_REST_Response(['error' => 'Authentication failed. Token is null.'], 500);
+        }
+
+        // Retry each shipment
+        foreach ($shipments as $shipment) {
+            try {
+                // Attempt to resend the payload
+                $response = wp_remote_post(
+                    'https://topship-staging.africa/api/save-shipment',
+                    [
+                        'headers' => [
+                            'Authorization' => 'Bearer ' . $token,
+                            'Content-Type' => 'application/json',
+                        ],
+                        'body' => $shipment['shopify_order'], // Already JSON encoded
+                        'timeout' => 45,
+                    ]
+                );
+
+                if (is_wp_error($response)) {
+                    Shopify_Shipments_Table::update_reason($shipment['id'], $response->get_error_message());
+                    continue;
+                }
+
+                $response_body = wp_remote_retrieve_body($response);
+                $response_code = wp_remote_retrieve_response_code($response);
+
+                if ($response_code === 200) {
+                    // Successfully booked
+                    Shopify_Shipments_Table::update_booked($shipment['id'], 1);
+                    ShipmentBookingsTable::processResponse(json_decode($response_body, true), $token);
+                } else {
+                    // Log failure reason
+                    $resp = json_decode($response_body, true);
+                    $reason = $resp['message'] ?? 'Unknown error';
+                    Shopify_Shipments_Table::update_reason($shipment['id'], $reason);
+                }
+            } catch (Exception $e) {
+                // Handle exceptions
+                Shopify_Shipments_Table::update_reason($shipment['id'], $e->getMessage());
+            }
+        }
+
+        return new WP_REST_Response(['message' => 'Retry process completed. Check logs for details.'], 200);
     }
 
     public static function get_pending(){
@@ -163,6 +283,29 @@ class Topship_API_Service_Africa {
         $resultData = json_decode($result, true);
 
         if (isset($resultData['message']) && $resultData['message'] == 'User already exists! Please sign in') {
+            if (Class_topship_helper::loginWithDetails($email,$password)!=null){
+                global $wpdb;
+                $wpdb->insert($wpdb->prefix . 'registrations', [
+                    'email' => $email,
+                    'password' => self::encrypt($password),
+                    'phoneNumber' => $phone,
+                    'fullName' => $first_name . ' ' . $last_name,
+                    'topshipId' => "",
+                    'reg_id' => "",
+                    'country' => $country,
+                    'state' => $state,
+                    'city' => $city,
+                    'address' => $address,
+                    'zipcode' => $postal_code,
+                    'country_code'=>$countryCode,
+                ]);
+
+                return new WP_REST_Response([
+                    'status' => 'success',
+                    'message' => 'Registration successful!',
+                    'data' => $resultData
+                ], 201);
+            }
             return new WP_REST_Response([
                 'message' => 'User already exists! Please use the appropriate email and password',
                 'error' => $resultData['message']

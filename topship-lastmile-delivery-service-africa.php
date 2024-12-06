@@ -57,11 +57,12 @@ class topshipLastMileDeliveryServiceAfrica {
             Topship_API_Service_Africa::init();
         });
 
-        Topship_Registration_Table::init();
+        TableManager::initialize_tables();
+       // Topship_Registration_Table::init();
         //Topship_Registration_Table::create_table();
         //ValueAddedTaxes_Table::init();
         // ShipmentBookingsTable::init();
-        //die('hello');
+
         //ShipmentBookingsTable::init();
         //ShipmentBookingsTable::create_table();
         //Shopify_Shipments_Table::init();
