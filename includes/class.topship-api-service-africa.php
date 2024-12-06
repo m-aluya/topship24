@@ -275,8 +275,9 @@ class Topship_API_Service_Africa {
     }
 
     public static function get_countries() {
-        // Initialize a cURL session
-        $ch = curl_init();
+
+        try {
+            $ch = curl_init();
 
         // Set the URL for the API request
         $url = 'https://api-topship.com/api/get-countries';
@@ -307,111 +308,101 @@ class Topship_API_Service_Africa {
 
         // Decode the JSON response
         $countries = json_decode($response, true);
-
-        // Check if the response contains countries data
-        if (empty($countries)) {
-            // Return an empty array if no countries are found
-            return [];
-        }
-
-        // Return the countries data
         return $countries;
+
+        } catch (\Throwable $th) {
+            error_log($th->getMessage());
+        }
+      
+        
     }
 
 
     public static function get_states($request) {
-        // Get the countryCode from the request parameters
-        $countryCode = $request->get_param('countryCode');
+      try {
+          // Get the countryCode from the request parameters
+          $countryCode = $request->get_param('countryCode');
 
-        // Initialize a cURL session
-        $ch = curl_init();
-
-        // Set the URL for the API request
-        $url = 'https://api-topship.com/api/get-states?countryCode=' . urlencode($countryCode);
-
-        // Set cURL options
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  // Return the response as a string
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Timeout if the request takes too long
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects if any
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-        // Execute the cURL request
-        $response = curl_exec($ch);
-
-        // Check for cURL errors
-        if ($response === false) {
-            // Log the error
-            error_log('Error fetching states: ' . curl_error($ch));
-
-            // Close the cURL session
-            curl_close($ch);
-
-            // Return an empty array if an error occurs
-            return [];
-        }
-
-        // Close the cURL session
-        curl_close($ch);
-
-        // Decode the JSON response
-        $states = json_decode($response, true);
-
-        // Check if the response contains states data
-        if (empty($states)) {
-            // Return an empty array if no states are found
-            return [];
-        }
-
-        // Return the states data
-        return $states;
+          // Initialize a cURL session
+          $ch = curl_init();
+  
+          // Set the URL for the API request
+          $url = 'https://api-topship.com/api/get-states?countryCode=' . urlencode($countryCode);
+  
+          // Set cURL options
+          curl_setopt($ch, CURLOPT_URL, $url);
+          curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  // Return the response as a string
+          curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Timeout if the request takes too long
+          curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects if any
+          curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+  
+          // Execute the cURL request
+          $response = curl_exec($ch);
+  
+          // Check for cURL errors
+          if ($response === false) {
+              // Log the error
+              error_log('Error fetching states: ' . curl_error($ch));
+  
+              // Close the cURL session
+              curl_close($ch);
+  
+              // Return an empty array if an error occurs
+              return [];
+          }
+  
+          // Close the cURL session
+          curl_close($ch);
+  
+          // Decode the JSON response
+          $states = json_decode($response, true);
+          return $states;
+      } catch (\Throwable $th) {
+        //throw $th;
+      }
     }
 
 
     public static function get_cities($request) {
-        // Initialize a cURL session
-        $countryCode = $request->get_param('countryCode');
-        $ch = curl_init();
-
-        // Set the URL for the API request with the countryCode parameter
-        $url = 'https://api-topship.com/api/get-cities?countryCode=' . urlencode($countryCode);
-
-        // Set cURL options
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  // Return the response as a string
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Timeout if the request takes too long
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Follow redirects if any
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-
-        // Execute the cURL request
-        $response = curl_exec($ch);
-
-        // Check for cURL errors
-        if ($response === false) {
-            // Log the error
-            error_log('Error fetching cities: ' . curl_error($ch));
-
-            // Close the cURL session
-            curl_close($ch);
-
-            // Return an empty array if an error occurs
-            return [];
-        }
-
-        // Close the cURL session
-        curl_close($ch);
-
-        // Decode the JSON response
-        $cities = json_decode($response, true);
-
-        // Check if the response contains cities data
-        if (empty($cities)) {
-            // Return an empty array if no cities are found
-            return [];
-        }
-
-        // Return the cities data
-        return $cities;
+     try {
+       
+           $countryCode = $request->get_param('countryCode');
+           $ch = curl_init();
+           $url = 'https://api-topship.com/api/get-cities?countryCode=' . urlencode($countryCode);
+   
+           // Set cURL options
+           curl_setopt($ch, CURLOPT_URL, $url);
+           curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);  
+           curl_setopt($ch, CURLOPT_TIMEOUT, 30); 
+           curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); 
+           curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+   
+           // Execute the cURL request
+           $response = curl_exec($ch);
+   
+           // Check for cURL errors
+           if ($response === false) {
+               // Log the error
+               error_log('Error fetching cities: ' . curl_error($ch));
+   
+               // Close the cURL session
+               curl_close($ch);
+   
+               // Return an empty array if an error occurs
+               return [];
+           }
+   
+           // Close the cURL session
+           curl_close($ch);
+   
+           // Decode the JSON response
+           $cities = json_decode($response, true);
+   
+           // Return the cities data
+           return $cities;
+     } catch (\Throwable $th) {
+        //throw $th;
+     }
     }
 
 
