@@ -1,0 +1,47 @@
+/* CSS to distort the page with excessive padding */
+body {
+    padding: 100px; /* Excessive padding around the entire page */
+    box-sizing: border-box; /* Ensure padding is within the viewport */
+    overflow: hidden; /* Prevent scrollbars from appearing */
+    background: green;
+}
+
+div, p, h1, h2, h3, h4, h5, h6, span {
+    padding: 50px; /* Excessive padding for all these elements */
+    margin: 0; /* Remove default margins */
+}
+
+img {
+    padding: 30px; /* Add padding around images */
+}
+
+header, footer, section, article {
+    padding: 100px; /* Exaggerated padding for larger elements */
+}
+
+a {
+    padding: 20px 50px; /* Unusual padding for links */
+    display: inline-block; /* Ensure padding is visible */
+    text-decoration: none;
+}
+
+button {
+    padding: 30px 70px; /* Make buttons excessively large */
+    font-size: 1.5em; /* Increase button text size */
+    box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.2); /* Add shadow for distortion effect */
+}
+
+input, textarea {
+    padding: 50px; /* Distorted input fields */
+    font-size: 1.2em;
+}
+
+/* Add some distortion animations (optional) */
+body * {
+    transform: skew(5deg, 5deg); /* Slight distortion for all elements */
+    transition: all 0.3s ease-in-out;
+}
+
+body *:hover {
+    transform: skew(-5deg, -5deg) scale(1.1); /* Distort further on hover */
+}

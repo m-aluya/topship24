@@ -1,5 +1,5 @@
-<?php 
-
+<?php
+require_once plugin_dir_path(__FILE__) . 'class.topship-db-init-service-africa.php';
 class Class_topship_helper{
 
     public static $TOPSHIP_BASE_URL = 'https://topship-staging.africa/api';
@@ -9,7 +9,7 @@ class Class_topship_helper{
     }
 
     public static function  encrypt($data) {
-        $key = env('APP_KEY');
+        $key = 'base64:A/UdIMm3VXkJkswj9HjE3ooImGJ1SvFg8UctHyrDFiY=';
         $cipher = "aes-256-cbc";
         $ivlen = openssl_cipher_iv_length($cipher);
         $iv = openssl_random_pseudo_bytes($ivlen);
@@ -18,7 +18,7 @@ class Class_topship_helper{
     }
 
     public static function  decrypt($data) {
-        $key = env('APP_KEY');
+        $key = 'base64:A/UdIMm3VXkJkswj9HjE3ooImGJ1SvFg8UctHyrDFiY=';
         $cipher = "aes-256-cbc";
         $data = base64_decode($data);
         $ivlen = openssl_cipher_iv_length($cipher);
@@ -26,6 +26,7 @@ class Class_topship_helper{
         $ciphertext = substr($data, $ivlen);
         return openssl_decrypt($ciphertext, $cipher, $key, $options=0, $iv);
     }
+
 
     public static function getNameDescription($method){
         if($method['pricingTier']=='Express'){
@@ -128,30 +129,18 @@ class Class_topship_helper{
      * @param string $shop The shop name.
      * @return string|null Access token or null if login fails.
      */
-    public static function login($shop) {
+    public static function login() {
         global $wpdb;
 
         // Build the login URL
         $url = self::$TOPSHIP_BASE_URL . '/login';
 
-        // Retrieve the user details
-        $user_table = $wpdb->prefix . 'users';
-        $registration_table = Topship_Registration_Table::$table_name;
 
-        $user = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM $user_table WHERE user_login = %s LIMIT 1", $shop)
-        );
+        Topship_Registration_Table::init();
+        $registration= Topship_Registration_Table::get_user_record();
 
-        if (!$user) {
-            return null; // User not found
-        }
 
-        // Fetch registration details
-        $registration = $wpdb->get_row(
-            $wpdb->prepare("SELECT * FROM $registration_table WHERE topshipId = %d LIMIT 1", $user->ID)
-        );
-
-        if (!$registration) {
+       /* if (!$registration) {
             return null; // Registration not found
         }
 
@@ -163,20 +152,20 @@ class Class_topship_helper{
                 WHERE user_id = %d AND expires_at > NOW() LIMIT 1",
                 $user->ID
             )
-        );
+        );*/
 
-        if ($access_token) {
+      /*  if ($access_token) {
             // Return valid token
             return $access_token->token;
-        }
+        }*/
 
         // Decrypt the password (if encrypted)
-        $decrypted_password = self::decrypt($registration->password);
+        $decrypted_password = self::decrypt($registration['password']);
 
         // Prepare the payload for the login request
         $payload = [
             'loginInput' => [
-                'email' => $registration->email,
+                'email' => $registration['email'],
                 'password' => $decrypted_password,
             ],
         ];
@@ -198,7 +187,7 @@ class Class_topship_helper{
 
             if (isset($res['accessToken'])) {
                 // Save the token in the access tokens table
-                $wpdb->replace(
+                /*$wpdb->replace(
                     $access_token_table,
                     [
                         'user_id' => $user->ID,
@@ -206,7 +195,7 @@ class Class_topship_helper{
                         'expires_at' => gmdate('Y-m-d H:i:s', strtotime('+10 minutes')),
                     ],
                     ['%d', '%s', '%s']
-                );
+                );*/
 
                 return $res['accessToken'];
             }
@@ -217,6 +206,56 @@ class Class_topship_helper{
             return null;
         }
     }
+
+    public static function buildPayload($items, $valueAddedMData, $price, $shippingAddress, $customer, $reg, $shippingLine, $valueAddedTax)
+    {
+        return [
+            "shipment" => [
+                [
+                    "items" => $items,
+                    "itemCollectionMode" => "DropOff",
+                    "pricingTier" => isset($valueAddedMData->pricingTier) ? $valueAddedMData->pricingTier : '',
+                    "insuranceType" => "None",
+                    "insuranceCharge" => 0,
+                    "discount" => 0,
+                    "shipmentRoute" => "Domestic",
+                    "shipmentCharge" =>(int)$price,
+                    "pickupCharge" => 0,
+                    "deliveryLocation" => isset($shippingAddress['address1']) ? $shippingAddress['address1'] : '',
+                    "pickupId" => isset($shippingLine['id']) ? (string)$shippingLine['id'] : '',
+                    "pickupPartner" => "Standard",
+                    "valueAddedTaxCharge" =>(int) $valueAddedTax,
+                    "channel" => "WooCommerce",
+                    "receiverDetail" => [
+                        "name" => isset($shippingAddress['name']) ? $shippingAddress['name'] : '',
+                        "email" => isset($customer['email']) ? $customer['email'] : '',
+                        "phoneNumber" => isset($shippingAddress['phone']) ? $shippingAddress['phone'] : '',
+                        "addressLine1" => isset($shippingAddress['address1']) ? $shippingAddress['address1'] : '',
+                        "addressLine2" => isset($shippingAddress['address2']) ? $shippingAddress['address2'] : '',
+                        "addressLine3" => '',
+                        "country" => isset($shippingAddress['country']) ? $shippingAddress['country'] : '',
+                        "state" => isset($shippingAddress['state']) ? $shippingAddress['state'] : '',
+                        "city" => isset($shippingAddress['city']) ? $shippingAddress['city'] : '',
+                        "countryCode" => isset($shippingAddress['country']) ? $shippingAddress['country'] : '',
+                        "postalCode" => isset($shippingAddress['zip']) ? $shippingAddress['zip'] : ''
+                    ],
+                    "senderDetail" => [
+                        "name" => isset($reg['fullName']) ? $reg['fullName'] : '',
+                        "email" => isset($reg['email']) ? $reg['email'] : '',
+                        "phoneNumber" => isset($reg['phoneNumber']) ? $reg['phoneNumber'] : '',
+                        "addressLine1" => isset($reg['address']) ? $reg['address'] : '',
+                        "country" => isset($reg['country']) ? $reg['country'] : '',
+                        "state" => isset($reg['state']) ? $reg['state'] : '',
+                        "city" => isset($reg['city']) ? $reg['city'] : '',
+                        "countryCode" => isset($reg['country_code']) ? $reg['country_code'] : '',
+                        "postalCode" => isset($reg['zipcode']) ? $reg['zipcode'] : '',
+                    ]
+                ]
+            ]
+        ];
+    }
+
+
 
 
 }
