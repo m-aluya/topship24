@@ -89,14 +89,21 @@ class Class_topship_delivery_service_africa{
                     </tbody>
                 </table>
             </div>
+<button @click="retry" class="btn btn-primary">Retry All</button>
         </div>
     </div>
+ <dial :show="show"/>
+            <mess :title="message.title" :message="message.message" :show="message.show"  @closed="closed"/>
+
 </div>
+
 
                 `,
                 data() {
                     return {
                         failedShipments: [],
+                        show: false,
+                        message: { title: 'My title', message: 'my message to you', show: false },
                     };
                 },
                 created() {
@@ -106,22 +113,46 @@ class Class_topship_delivery_service_africa{
                     this.startAutoRefresh();
                 }
                 ,
+
                 methods: {
+                    retry(){
+                        this.show=true;
+                        fetch('<?php echo esc_url(home_url('/wp-json/topship/v1/retry')); ?>')
+                            .then((response) => response.json())
+                            .then((data) => {
+                                this.show=false;
+                            })
+                            .catch((error) => {
+                                this.show=false;
+                            });
+                        this.fetchFailedShipments();
+                    },
+                    showMessage(title, message) {
+                        this.message.title = title;
+                        this.message.message = message;
+                        this.message.show = true;
+                    },
+                    closed(action) {
+                        this.message.show = false;
+                    },
                     fetchFailedShipments() {
+                        this.show=true;
                         fetch('<?php echo esc_url(home_url('/wp-json/topship/v1/pending')); ?>')
                             .then((response) => response.json())
                             .then((data) => {
+                                this.show=false;
                                 this.failedShipments = data;
                                 console.log('failedShipments',this.failedShipments);
                             })
                             .catch((error) => {
+                                this.show=false;
                                 console.error('Error fetching failed shipments:', error);
                             });
                     },
                     startAutoRefresh() {
                         this.refreshInterval = setInterval(() => {
                             this.fetchFailedShipments();
-                        }, 10000);
+                        }, 100000);
                     },
                 },
                 unmounted() {
@@ -145,7 +176,8 @@ class Class_topship_delivery_service_africa{
                 <div class="col-md-12 mx-auto p-4">
                     <?php self::render_navigation(); ?>
                     <?php
-                    wp_enqueue_style('uptown-css', plugins_url('../css/style.css', __FILE__));
+                    wp_enqueue_style('general-style', plugins_url('../css/style.css', __FILE__));
+                    wp_enqueue_style('dashboard-style', plugins_url('../css/style_dashboard.css', __FILE__));
                     wp_enqueue_script('my-plugin-js', plugin_dir_url(__FILE__) . '../js/my-plugin.js', ['vue-js'], null, true);
                     ?>
                     <div class="shadow bg-white p-5">
@@ -229,7 +261,8 @@ class Class_topship_delivery_service_africa{
         <div class="container">
             <div class="table-container">
                 <h1 class="title">Shipment Dashboard</h1>
-                <table class="table">
+ <div class="table-responsive">
+            <table class="table table-bordered table-hover">
                     <thead>
                         <tr>
                             <th>Shipment ID</th>
@@ -266,6 +299,7 @@ class Class_topship_delivery_service_africa{
                         </tr>
                     </tbody>
                 </table>
+</div>
                 <p id="message"></p>
             </div>
             <div class="pagination">
@@ -877,6 +911,9 @@ public static function topship_contact_us_page(){
                 </div>
             </div>
         </div>
+        <dial :show="show"/>
+        <mess :title="message.title" :message="message.message" :show="message.show"  @closed="closed"/>
+
     </div>
 
     <script>
@@ -903,7 +940,7 @@ public static function topship_contact_us_page(){
                 }
             });
 
-            //app= utilityVueComponent(app);
+            app= utilityVueComponent(app);
             // Define the RegistrationComponent
             app.component('contact-component', {
                 template: `
@@ -977,7 +1014,7 @@ public static function topship_contact_us_page(){
                     },
                     submitForm() {
                         this.show = true;
-                        axios.post(this.base_url+'api/contact', this.input)
+                        axios.post('<?php echo esc_url(home_url('/wp-json/topship/v1/contact')); ?>', this.input)
                             .then(response => {
                                 this.show = false;
                                 this.showMessage('Success', 'Your message has been sent successfully.');
