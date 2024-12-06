@@ -153,7 +153,7 @@ class Topship_Registration_Table {
     public static function init() {
        // echo 'hello';
         global $wpdb;
-        self::$table_name = $wpdb->prefix . 'registrations';
+        self::$table_name = $wpdb->prefix . 'top_ship_registrations';
         //die(__FILE__);
         // Hook to run the table creation on plugin activation
        // register_activation_hook(__FILE__, [self::class, 'create_table']);
@@ -729,10 +729,10 @@ class TableManager {
         }
 
         // Check and initialize ShipmentBookingsTable
-        Access_Tokens_Table::init();
+      /*  Access_Tokens_Table::init();
         if (!Access_Tokens_Table::table_exists()) {
             Access_Tokens_Table::create_table();
-        }
+        }*/
 
         // Check and initialize Shopify_Shipments_Table
         ShipmentBookingsTable::init();

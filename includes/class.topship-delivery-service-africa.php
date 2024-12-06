@@ -633,7 +633,7 @@ class Class_topship_delivery_service_africa{
                             };
 
                             this.show=true;
-                            axios.post(`<?php echo esc_url(home_url('/wp-json/topship/v1/payforbooking')); ?>`, this.data, {headers})
+                            axios.post(`<?php echo esc_url(home_url('/wp-json/topship/v1/register')); ?>`, this.data, {headers})
                                 .then(response => {
                                     //Handle successful registration
                                     console.log('Registration successful:', response.data);

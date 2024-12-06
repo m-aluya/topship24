@@ -176,6 +176,7 @@ class Class_topship_helper{
                 'body' => wp_json_encode($payload),
                 'timeout' => 45,
             ]);
+            error_log(json_encode($response));
 
             if (is_wp_error($response)) {
                 throw new Exception($response->get_error_message());
