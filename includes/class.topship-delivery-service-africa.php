@@ -672,6 +672,7 @@ class Class_topship_delivery_service_africa{
                                 const response = await fetch(`<?php echo esc_url(home_url('/wp-json/topship/v1/states/')); ?>${this.country}`);
                                 if (!response.ok) throw new Error('Failed to fetch states');
                                 this.stateList = await response.json();
+                                this.stateList.sort((a, b) => a.name.localeCompare(b.name));
                             } catch (error) {
                                 console.error('Failed to fetch states:', error);
                             } finally {
@@ -684,6 +685,8 @@ class Class_topship_delivery_service_africa{
                                 const url = `<?php echo esc_url(home_url('/wp-json/topship/v1/cities/')); ?>${this.country}`;
                                 const response = await fetch(url);
                                 this.cityList = await response.json();
+                                console.log('cities',JSON.stringify( this.cityList));
+                                this.cityList.sort((a, b) => a.cityName.localeCompare(b.cityName));
                             } catch (error) {
                                 console.error('Failed to fetch cities:', error);
                             } finally {
@@ -719,12 +722,18 @@ class Class_topship_delivery_service_africa{
                         this.load.country = true;
                         fetch(`<?php echo esc_url(home_url('/wp-json/topship/v1/countries')); ?>`)
                             .then(response => response.json())
-                            .then(data => this.countries = data)
+                            .then(data =>{ this.countries = data;
+                                this.countries.sort((a, b) => a.name.localeCompare(b.name));
+                                console.log('countries',JSON.stringify(this.countries));
+                            })
                             .catch(error => console.error('Failed to fetch countries:', error));
+
                         this.load.country = false;
 
                         var recaptchaWidgetId;
-                       //console.log(this.countries)
+
+
+
                         try {
                             recaptchaWidgetId = grecaptcha.render('recaptcha-container', {
                                 'sitekey': '6Leu53UnAAAAAAJj75YNK0bBMD-3v1lS8oQN8fi7',

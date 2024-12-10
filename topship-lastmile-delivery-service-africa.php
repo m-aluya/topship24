@@ -604,7 +604,7 @@ class topshipLastMileDeliveryServiceAfrica {
                 "description" => $item->get_name(),
                 "weight" => $item->get_meta('weight', true) ?: 1, // Example: Adjust weight logic as needed
                 "quantity" => (float)$item->get_quantity(),
-                "value" => (float)$item->get_total(),
+                "value" => round($item->get_total(), 2),
             ];
         }
         error_log('Order Items: ' . json_encode($items));
@@ -640,7 +640,7 @@ class topshipLastMileDeliveryServiceAfrica {
             return;
         }
         // Send payload to Topship API
-        $url = 'https://topship-staging.africa/api/save-shipment';
+        $url =Class_topship_helper::$TOPSHIP_BASE_URL. '/save-shipment';
         try {
             $response = wp_remote_post(
                 $url,

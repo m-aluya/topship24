@@ -656,7 +656,7 @@ class ShipmentBookingsTable {
     }
 
     public static function payFromWallet($shipmentId, $token) {
-        $url = 'https://topship-staging.africa/api'. '/pay-from-wallet'; // Use WordPress getenv for environment variables
+        $url = Class_topship_helper::$TOPSHIP_BASE_URL . '/pay-from-wallet'; // Use WordPress getenv for environment variables
         $payload = [
             'detail' => [
                 'shipmentId' => $shipmentId,
