@@ -2,7 +2,8 @@
 require_once plugin_dir_path(__FILE__) . 'class.topship-db-init-service-africa.php';
 class Class_topship_helper{
 
-    public static $TOPSHIP_BASE_URL = 'https://topship-staging.africa/api';
+    //public static $TOPSHIP_BASE_URL = 'https://topship-staging.africa/api';//
+    public static $TOPSHIP_BASE_URL = 'https://api-topship.com/api';
 
     private static function topshipLink(){
         return 'topship-africa-admin-page-01-ba5e0604-954d-4d49-b43e-61ac97f3eb75';
@@ -86,7 +87,7 @@ class Class_topship_helper{
      */
     public static function api_request($endpoint, $data = [], $method = 'GET') {
         // Ensure the endpoint is correctly concatenated with the base URL
-        $url = 'https://topship-staging.africa/api/' . ltrim($endpoint, '/');
+        $url = self::$TOPSHIP_BASE_URL . '/'.ltrim($endpoint, '/');
 
         $args = [
             'method' => strtoupper($method), // Ensure method is in uppercase
@@ -229,11 +230,13 @@ class Class_topship_helper{
                 'timeout' => 45,
             ]);
 
+
             if (is_wp_error($response)) {
                 throw new Exception($response->get_error_message());
             }
 
             $response_body = wp_remote_retrieve_body($response);
+            error_log('Topship login : ' .$response_body);
             $res = json_decode($response_body, true);
 
             if (isset($res['accessToken'])) {
@@ -274,8 +277,8 @@ class Class_topship_helper{
                         "addressLine1" => isset($shippingAddress['address1']) ? $shippingAddress['address1'] : '',
                         "addressLine2" => isset($shippingAddress['address2']) ? $shippingAddress['address2'] : '',
                         "addressLine3" => '',
-                        "country" => isset($shippingAddress['country']) ? $shippingAddress['country'] : '',
-                        "state" => isset($shippingAddress['state']) ? $shippingAddress['state'] : '',
+                        "country" => 'United States',//isset($shippingAddress['country']) ? $shippingAddress['country'] : '',
+                        "state" =>'California',// isset($shippingAddress['state']) ? $shippingAddress['state'] : '',
                         "city" => isset($shippingAddress['city']) ? $shippingAddress['city'] : '',
                         "countryCode" => isset($shippingAddress['country']) ? $shippingAddress['country'] : '',
                         "postalCode" => isset($shippingAddress['zip']) ? $shippingAddress['zip'] : ''
