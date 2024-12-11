@@ -6,6 +6,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/class.topship-db-init-service
 if (!class_exists('Topship_Shipping_Method')) {
     class Topship_Shipping_Method extends WC_Shipping_Method {
         public function __construct() {
+            error_reporting(E_ALL & ~E_WARNING);
             $this->id                 = 'topship_last_mile';
             $this->method_title       = __('Topship Last Mile Delivery', 'woocommerce');
             $this->method_description = __('Delivery service across Africa using Topship.', 'woocommerce');

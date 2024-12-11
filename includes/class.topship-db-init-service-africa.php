@@ -198,7 +198,8 @@ class Topship_Registration_Table {
 
         // Query to fetch the first record based on the primary key (id)
         $query = $wpdb->prepare(
-            "SELECT * FROM " . self::$table_name . " ORDER BY id ASC LIMIT 1"
+            "SELECT * FROM " . self::$table_name . " ORDER BY id ASC LIMIT %d",
+            1 // Placeholder value
         );
 
         // Execute the query and get the result
