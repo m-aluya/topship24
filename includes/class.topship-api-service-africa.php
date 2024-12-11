@@ -269,7 +269,7 @@ class Topship_API_Service_Africa {
             'Content-Type: application/json',
             'Content-Length: ' . strlen($rd),
         ]);
-        curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '\\cacert.pem');
+       // curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '\\cacert.pem');
 
         $result = curl_exec($ch);
         if (curl_errno($ch)) {
