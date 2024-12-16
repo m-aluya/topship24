@@ -145,7 +145,7 @@ class Topship_API_Service_Africa {
             try {
                 // Attempt to resend the payload
                 $response = wp_remote_post(
-                    'https://topship-staging.africa/api/save-shipment',
+                  Class_topship_helper::$TOPSHIP_BASE_URL.  '/save-shipment',
                     [
                         'headers' => [
                             'Authorization' => 'Bearer ' . $token,
@@ -254,7 +254,7 @@ class Topship_API_Service_Africa {
 
         $rd = json_encode($formData);
         //return
-        $signupUrl = 'https://topship-staging.africa/api/signup';
+        $signupUrl = Class_topship_helper::$TOPSHIP_BASE_URL. '/signup';
 
         // Log the JSON encoded $rd in case it's useful for debugging
         error_log('JSON encoded Topship registration data: ' . $rd);
@@ -269,7 +269,7 @@ class Topship_API_Service_Africa {
             'Content-Type: application/json',
             'Content-Length: ' . strlen($rd),
         ]);
-        //curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '\\cacert.pem');
+       // curl_setopt($ch, CURLOPT_CAINFO, __DIR__ . '\\cacert.pem');
 
         $result = curl_exec($ch);
         if (curl_errno($ch)) {

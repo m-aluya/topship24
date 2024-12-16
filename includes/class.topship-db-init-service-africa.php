@@ -198,7 +198,8 @@ class Topship_Registration_Table {
 
         // Query to fetch the first record based on the primary key (id)
         $query = $wpdb->prepare(
-            "SELECT * FROM " . self::$table_name . " ORDER BY id ASC LIMIT 1"
+            "SELECT * FROM " . self::$table_name . " ORDER BY id ASC LIMIT %d",
+            1 // Placeholder value
         );
 
         // Execute the query and get the result
@@ -656,7 +657,7 @@ class ShipmentBookingsTable {
     }
 
     public static function payFromWallet($shipmentId, $token) {
-        $url = 'https://topship-staging.africa/api'. '/pay-from-wallet'; // Use WordPress getenv for environment variables
+        $url = Class_topship_helper::$TOPSHIP_BASE_URL . '/pay-from-wallet'; // Use WordPress getenv for environment variables
         $payload = [
             'detail' => [
                 'shipmentId' => $shipmentId,
