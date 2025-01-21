@@ -42,10 +42,7 @@ class topshipLastMileDeliveryServiceAfrica {
 
         add_action('woocommerce_thankyou', [$this,'handle_topship_checkout_submission']);
 
-        add_action('woocommerce_checkout_create_order', [$this,'handle_topship_checkout_create_order']);
 
-
-        /* add_action('woocommerce_checkout_order_processed', [this,'handle_topship_checkout_submission']);*/
 
         add_action('wp_enqueue_scripts', [$this, 'enqueue_topship_shipping_scripts']);
 
@@ -70,6 +67,8 @@ class topshipLastMileDeliveryServiceAfrica {
         //ValueAddedTaxes_Table::create_table();
         //register_activation_hook(__FILE__, ['Topship_Registration_Table', 'create_table']);
     }
+
+
 
     public function init_shipping_method() {
         include_once 'class-topship-shipping-method.php';

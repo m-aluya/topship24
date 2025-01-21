@@ -287,7 +287,7 @@ class Class_topship_delivery_service_africa{
                                 </span>
                             </td>
                             <td>{{ formatCurrency(booking.total_charge) }}</td>
-                            <td>{{ booking.currency }}</td>
+                            <td>NGN</td>
                             <td>{{ booking.total_weight }}</td>
                             <td>{{ formatDateString(booking.created_date) }}</td>
                             <td>
