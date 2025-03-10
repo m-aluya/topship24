@@ -287,7 +287,7 @@ class Class_topship_delivery_service_africa{
                                 </span>
                             </td>
                             <td>{{ formatCurrency(booking.total_charge) }}</td>
-                            <td>{{ booking.currency }}</td>
+                            <td>NGN</td>
                             <td>{{ booking.total_weight }}</td>
                             <td>{{ formatDateString(booking.created_date) }}</td>
                             <td>
@@ -765,31 +765,38 @@ public static function topship_guide_page(){
                 wp_enqueue_style('uptown-css', plugins_url('../css/style.css', __FILE__));
                 wp_enqueue_script('my-plugin-js', plugin_dir_url(__FILE__) . '../js/my-plugin.js', ['vue-js'], null, true);
                 ?>
-                <div class="shadow bg-white p-5">
-                    <div>
+                <div class="shadow bg-white">
+                    <div class="p-5">
 
-                        <div style="">
-                            <div class="row" style="">
-                                <div class="col-md-5">
-                                    <div style="text-align: start; width: 80%">
-                                        <h1 class="fw-bold">Guide</h1>
-                                        <p>
-                                            Topship helps you send packages of all sizes to customers at any location worldwide.
-                                            Available to businesses located in Nigeria only. For more information, visit
-                                            <a href="https://www.topship.africa" target="_blank">www.topship.africa</a>
-                                        </p>
+                        <div class="">
+                            <!-- Top Contact Section -->
+                            <div class="text-center top-contact py-2">
+                                <span style="color: #003896"  class=" fw-bold">Need help? Talk to us! </span>
+                                <a style="color: #003896"  href="tel:02013302594" class="mx-2 text-decoration-none">📞 02013302594</a>
+                                <a style="color: #003896"  href="tel:+234801234578" class="mx-2 text-decoration-none">📱 +234801234578</a>
+                                <a style="color: #003896"  href="mailto:hello@topship.africa" class="mx-2 text-decoration-none">📧 hello@topship.africa</a>
+                            </div>
+
+                            <div class="d-flex flex-column justify-content-center align-items-center text-center vh-10">
+                                <h2 style="color: #003896" class="fw-bold">topship</h2>
+
+                                <!-- Card -->
+                                <div class="card p-5 mt-3" style="max-width: 500px;">
+                                    <div class="guide-card text-center">
+                                        <h2 class="fw-bold">Guide</h2>
+                                        <p class="text-muted">Ready to spend less time on shipping? Let’s help you set up your Topship plugin.
+                                            Topship helps you send packages of all sizes to customers in 200+ cities worldwide.</p>
+                                        <a style="background: #003896; color: #fff"  target="_blank" href="https://blog.topship.africa/wordpress-topshi…stallation-guide/" class="btn p-2">Go to Guide</a>
                                     </div>
-                                    <div class="imgdev">
-                                        <img class="rotate-90" src="<?php echo  plugin_dir_url(__FILE__) . '../image/path.png'?>" alt="image"/>
+
+                                    <!-- Footer -->
+                                    <div class="text-center mt-4">
+                                        <p>For more information, visit <a href="https://topship.africa" style="color: #003896"  class=" fw-bold">topship.africa</a></p>
                                     </div>
-                                </div>
-                                <div id="app" class="col-md-7">
-                                    <guide-component></guide-component>
                                 </div>
                             </div>
+
                         </div>
-
-
                     </div>
                 </div>
             </div>
@@ -824,50 +831,7 @@ public static function topship_guide_page(){
             // Define the RegistrationComponent
             app.component('guide-component', {
                 template: `
-<div class="card border-0">
-                <h4 class="text-start">Things to note for a stress-free plug-in experience</h4>
-                <ul class="text-start">
-                    <li>
-                        Create a Topship account in the signup form, log in to your account, and credit your wallet to avoid any interruptions in your shipping experience.
-                        <a href="https://ship.topship.africa/signup" target="_blank">Signup</a>
-                    </li>
-                    <li>
-                        <p>Configure your checkout settings as follows:</p>
-                        <span class="badge bg-warning text-dark">Phone number is required</span><br>
-                        <span class="badge bg-warning text-dark">First name and last name are required</span>
-                     </li>
-   <img style="width:100%" class="" src="<?php echo  plugin_dir_url(__FILE__) . '../image/checkout.PNG'?>" alt="Checkout settings">
 
-                    <li>
-                        <p>All shipments booked via the plugin are “drop-off only.” You must drop the packages off at a Topship drop-off center. See the list of hubs:
-                            <a href="https://topship.africa/#drop-off-hubs" target="_blank">Drop-off hubs</a>
-                        </p>
-                    </li>
-                    <li>
-                        <p>If you live in a city without a Topship hub, contact us for a custom solution. Email us at
-                            <a href="mailto:hello@topship.africa" target="_blank">hello@topship.africa</a>.
-                        </p>
-                    </li>
-                    <li>
-                        <p>This plugin is available to businesses that ship out of Nigeria only.</p>
-                    </li>
-                </ul>
-                <hr>
-                <h4 class="text-start">Understanding our shipping rates:</h4>
-                <p>We offer flexible prices to simplify shipping for your business and customers:</p>
-                <ul class="text-start">
-                    <li><span class="text-primary fw-bold">Express:</span> Delivery in 3 - 7 business days (import duties not included).</li>
-                    <li><span class="text-primary fw-bold">Saver Priority:</span> Delivery in 5 - 7 business days (import duties not included).</li>
-                    <li><span class="text-primary fw-bold">Saver:</span> Delivery in 10 - 12 business days (import duties not included).</li>
-                    <li><span class="text-primary fw-bold">Budget:</span> Delivery in 10 - 15 business days (inclusive of import duties).</li>
-                </ul>
-                <div class="p-3 bg-light text-start">
-                    <p class="mb-0">Need assistance? Contact support at
-                        <a href="mailto:hello@topship.africa" target="_blank">hello@topship.africa</a> or call
-                        <a href="tel:02013302594" target="_blank">02013302594</a>.
-                    </p>
-                </div>
-            </div>
             `,
 
             });

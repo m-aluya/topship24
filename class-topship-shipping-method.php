@@ -31,7 +31,7 @@ if (!class_exists('Topship_Shipping_Method')) {
 
             //add_filter('woocommerce_checkout_fields', [self::class, 'ensure_postcode_checkout_field']);
 
-            error_log('init is running');
+            //error_log('init is running');
             //Save settings
             //add_action('woocommerce_update_options_shipping_' . $this->id, [$this, 'process_admin_options']);
             add_filter('woocommerce_checkout_fields', [$this,'ensure_postcode_checkout_field']);
@@ -39,17 +39,41 @@ if (!class_exists('Topship_Shipping_Method')) {
 
             $fields = apply_filters('woocommerce_checkout_fields', WC()->checkout->get_checkout_fields());
 
+            /*add_action('woocommerce_after_order_notes', 'add_custom_checkout_field');
+            add_action('woocommerce_checkout_process', 'validate_custom_checkout_field');
+            add_action('woocommerce_checkout_update_order_meta', 'save_custom_checkout_field');*/
+
             //var_dump($fields);
             //Modify the postal code directly
             //$fields['billing']['billing_postcode']['required'] = true;
-
             //Now, update the checkout fields (if needed)
             //WC()->checkout->set_checkout_fields($fields);
-
-
         }
 
-       public  function ensure_postcode_checkout_field($fields) {
+        function validate_custom_checkout_field() {
+            if (!$_POST['delivery_instructions']) {
+                wc_add_notice(__('Please enter delivery instructions.'), 'error');
+            }
+        }
+
+        function save_custom_checkout_field($order_id) {
+            if (!empty($_POST['delivery_instructions'])) {
+                update_post_meta($order_id, 'delivery_instructions', sanitize_text_field($_POST['delivery_instructions']));
+            }
+        }
+
+        function add_custom_checkout_field($checkout) {
+            echo '<div id="custom_checkout_field"><h3>' . __('Additional Information') . '</h3>';
+            woocommerce_form_field('delivery_instructions', array(
+                'type'        => 'textarea',
+                'class'       => array('form-row-wide'),
+                'label'       => __('Delivery Instructions'),
+                'placeholder' => __('Enter specific delivery instructions here...'),
+            ), $checkout->get_value('delivery_instructions'));
+            echo '</div>';
+        }
+
+        public  function ensure_postcode_checkout_field($fields) {
             // Add billing postcode if not present
             error_log('ensure_postcode_checkout_field is running');
 
@@ -81,7 +105,7 @@ if (!class_exists('Topship_Shipping_Method')) {
             }
 
             // Log fields for debugging
-           // error_log('Modified checkout fields: ' . print_r($fields, true));
+            // error_log('Modified checkout fields: ' . print_r($fields, true));
 
             return $fields;
         }
@@ -105,11 +129,13 @@ if (!class_exists('Topship_Shipping_Method')) {
             ];
         }
 
-      public static function getId(){
+        public static function getId(){
 
         }
         public function calculate_shipping($package = []) {
 
+            $currency_rate=  Class_topship_helper::convertFromServer("KOBO",100);
+            error_log('currency_rate: '.$currency_rate);
             // Get checkout session ID (example implementation)
             $checkout_session_id = WC()->session->get('order_awaiting_payment'); // WooCommerce session data
             if (!$checkout_session_id) {
@@ -143,20 +169,19 @@ if (!class_exists('Topship_Shipping_Method')) {
             $total_weight = 0;
             foreach ($package['contents'] as $item_id => $item) {
                 $product = $item['data']; // Get the product object
+                error_log("product object: ". json_encode($product));
                 if ($product) {
                     $item_weight = $product->get_weight()?: 1; // Get the weight of each item in the package
                     $total_weight += $item_weight * $item['quantity']; // Add weight based on quantity
                 }
             }
 
-            // Log the total weight for debugging
-            //error_log("Total Package Weight: " . $total_weight);
 
             if(($total_weight/count($package['contents']))>1){
                 //$total_weight=$total_weight/1000;
             }
             if($reg==null)return[];
-           // $total_weight=100;
+            // $total_weight=100;
             $resq='{
               "shipmentDetail": {
                 "senderDetails": {
@@ -181,14 +206,15 @@ if (!class_exists('Topship_Shipping_Method')) {
 
             error_log("res: ". json_encode( $res));
 
-
-            if($res){
+            if($currency_rate==null)$res=null;
+            if($res ){
                 //dd($res[0]);
                 //$res= json_decode($res);
                 $rates = [];
+
                 $_SESSION['topship_shipping_rates'] = [];
                 foreach($res as $key => $method){
-
+                    error_log("$method: ". $method);
                     if($method['pricingTier']=='LastMileBudget')
                     {
                         if(strtolower( $reg['country_code'] )=='us'){
@@ -200,13 +226,42 @@ if (!class_exists('Topship_Shipping_Method')) {
                                 $valueAddedTax = ceil(Class_topship_helper::value_Added_Tax_Charge($newPrice));
                                 $totalPrice=$newPrice+$valueAddedTax;
                                 ValueAddedTaxes_Table::createValueAddedTax($valueAddedTax,2000,'',$method['cost'],'',$method['pricingTier'],'',$code);
-                                $rates[]=
+
+                                $tags_html = '';
+                                foreach ($method['tags'] as $tag) {
+                                    // Check if it's JSON
+                                    $decodedTag = json_decode($tag, true);
+                                    if ($decodedTag) {
+                                        foreach ($decodedTag as $element) {
+                                            $content = '';
+                                            foreach ($element['content'] as $subContent) {
+                                                if ($subContent['type'] === 'text') {
+                                                    if(strlen( $subContent['content'])<18)
+                                                        $content .= '  ' . htmlspecialchars($subContent['content']);
+                                                    else
+                                                        $content .= ' _ ' . htmlspecialchars($subContent['content']);
+                                                } elseif ($subContent['type'] === 'strong') {
+                                                    $content .= '_  <strong>' . htmlspecialchars($subContent['content'][0]['content']) . '</strong>';
+                                                }
+                                            }
+                                            $tags_html .= $content . '.<br>';
+                                        }
+                                    } else {
+                                        // If it's a simple string, prepend a comma instead of a period
+                                        $tags_html .= ' _ ' . htmlspecialchars($tag) . '<br>';
+                                    }
+                                }
+
+
+                                //$rates[]=
 
                                 $rate=[
                                     'id' => $code,
-                                    'label' =>__($newMethod['mode'], 'woocommerce') ,// 'Top Ship',
-                                    'cost' => $totalPrice/100, // 50.00 in the currency
-                                    'description' =>__($newMethod['duration'], 'woocommerce'),
+                                    'label' =>
+                                        "<strong>{$newMethod['mode']}</strong>: {$newMethod['duration']} _Customs clearance charge is included in price"
+                                    ,//__($newMethod['mode'].": ".$newMethod['duration'], 'woocommerce') ,// 'Top Ship',
+                                    'cost' =>  round( ($totalPrice/100)/$currency_rate,2), // 50.00 in the currency
+                                    'description' =>__('Delivery within 3-5 business days.'.$newMethod['duration'], 'woocommerce'),
                                 ];
                                 $rates[]= $rate;
                                 // Start the session if not already started
@@ -231,13 +286,43 @@ if (!class_exists('Topship_Shipping_Method')) {
                             $valueAddedTax = ceil(Class_topship_helper::value_Added_Tax_Charge($newPrice));
                             $totalPrice=$newPrice+$valueAddedTax;
                             ValueAddedTaxes_Table::createValueAddedTax($valueAddedTax,2000,'',$method['cost'],'',$method['pricingTier'],'',$code);
-                            $rates[]=
+                            //$rates[]=
+
+                            $tags_html = '';
+                            foreach ($method['tags'] as $tag) {
+                                // Check if it's JSON
+                                $decodedTag = json_decode($tag, true);
+                                if ($decodedTag) {
+                                    foreach ($decodedTag as $element) {
+                                        $content = '';
+                                        foreach ($element['content'] as $subContent) {
+                                            if ($subContent['type'] === 'text') {
+                                                if(strlen( $subContent['content'])<18)
+                                                    $content .= '  ' . htmlspecialchars($subContent['content']);
+                                                else
+                                                    $content .= ' _ ' . htmlspecialchars($subContent['content']);
+                                            } elseif ($subContent['type'] === 'strong') {
+                                                $content .= '_  <strong>' . htmlspecialchars($subContent['content'][0]['content']) . '</strong>';
+                                            }
+                                        }
+                                        $tags_html .= $content . '.<br>';
+                                    }
+                                } else {
+                                    // If it's a simple string, prepend a comma instead of a period
+                                    $tags_html .= ' _ ' . htmlspecialchars($tag) . '<br>';
+                                }
+                            }
+
+
+
 
                             $rate=[
                                 'id' => $code,
-                                'label' =>__($newMethod['mode'], 'woocommerce') ,// 'Top Ship',
-                                'cost' => $totalPrice/100, // 50.00 in the currency
-                                'description' =>__($newMethod['duration'], 'woocommerce'),
+                                'label' =>
+                                    "<strong>{$newMethod['mode']}</strong>: {$newMethod['duration']} _Customs clearance charge is included in price"
+                                ,//__($newMethod['mode'].": ".$newMethod['duration'], 'woocommerce') ,// 'Top Ship',
+                                'cost' => round( ($totalPrice/100)/$currency_rate,2), // 50.00 in the currency
+                                'description' =>__('Delivery within 3-5 business days.'.$newMethod['duration'], 'woocommerce'),
                             ];
                             $rates[]= $rate;
                             // Start the session if not already started
@@ -263,13 +348,40 @@ if (!class_exists('Topship_Shipping_Method')) {
                         $valueAddedTax = ceil(Class_topship_helper::value_Added_Tax_Charge($newPrice));
                         $totalPrice=$newPrice+$valueAddedTax;
                         ValueAddedTaxes_Table::createValueAddedTax($valueAddedTax,2000,'',$method['cost'],'',$method['pricingTier'],'',$code);
-                        $rates[]=
+                        //$rates[]=
+
+                        $tags_html = '';
+                        foreach ($method['tags'] as $tag) {
+                            // Check if it's JSON
+                            $decodedTag = json_decode($tag, true);
+                            if ($decodedTag) {
+                                foreach ($decodedTag as $element) {
+                                    $content = '';
+                                    foreach ($element['content'] as $subContent) {
+                                        if ($subContent['type'] === 'text') {
+                                            if(strlen( $subContent['content'])<18)
+                                                $content .= '  ' . htmlspecialchars($subContent['content']);
+                                            else
+                                                $content .= ' _ ' . htmlspecialchars($subContent['content']);
+                                        } elseif ($subContent['type'] === 'strong') {
+                                            $content .= '_  <strong>' . htmlspecialchars($subContent['content'][0]['content']) . '</strong>';
+                                        }
+                                    }
+                                    $tags_html .= $content . '.<br>';
+                                }
+                            } else {
+                                // If it's a simple string, prepend a comma instead of a period
+                                $tags_html .= ' _ ' . htmlspecialchars($tag) . '<br>';
+                            }
+                        }
 
                         $rate=[
                             'id' => $code,
-                            'label' =>__($newMethod['mode'], 'woocommerce') ,// 'Top Ship',
-                            'cost' => $totalPrice/100, // 50.00 in the currency
-                            'description' =>__($newMethod['duration'], 'woocommerce'),
+                            'label' =>
+                                "<strong>{$newMethod['mode']}</strong>: {$newMethod['duration']} _Receiver will be required to pay customs clearance charges"
+                            ,//__($newMethod['mode'].": ".$newMethod['duration'], 'woocommerce') ,// 'Top Ship',
+                            'cost' => round( ($totalPrice/100)/$currency_rate,2), // 50.00 in the currency
+                            'description' =>__( $newMethod['duration'], 'woocommerce'),
                         ];
                         $rates[]= $rate;
                         // Start the session if not already started
@@ -283,37 +395,176 @@ if (!class_exists('Topship_Shipping_Method')) {
 
                         // Add the rate to the session array
                         $_SESSION['topship_shipping_rates'][$code] = $rate;
+                    } elseif ($method['pricingTier']=='SeaExport'){
+                        if($data->shipmentDetail->totalWeight>=100){
+                            $newMethod=Class_topship_helper::getNameDescription($method);
+                            $newPrice =$method['cost'];
+                            $code =$checkout_session_id. $method['pricingTier'];//ValueAddedTaxes_Table::generate_unique_code($method['pricingTier']);
+                            //Log::info('currency: '.$currency);
+                            $valueAddedTax = ceil(Class_topship_helper::value_Added_Tax_Charge($newPrice));
+                            $totalPrice=$newPrice+$valueAddedTax;
+                            ValueAddedTaxes_Table::createValueAddedTax($valueAddedTax,2000,'',$method['cost'],'',$method['pricingTier'],'',$code);
+                            // $rates[]=
+
+                            $tags_html = '';
+                            foreach ($method['tags'] as $tag) {
+                                // Check if it's JSON
+                                $decodedTag = json_decode($tag, true);
+                                if ($decodedTag) {
+                                    foreach ($decodedTag as $element) {
+                                        $content = '';
+                                        foreach ($element['content'] as $subContent) {
+                                            if ($subContent['type'] === 'text') {
+                                                if(strlen( $subContent['content'])<18)
+                                                    $content .= '  ' . htmlspecialchars($subContent['content']);
+                                                else
+                                                    $content .= ' _ ' . htmlspecialchars($subContent['content']);
+                                            } elseif ($subContent['type'] === 'strong') {
+                                                $content .= '_  <strong>' . htmlspecialchars($subContent['content'][0]['content']) . '</strong>';
+                                            }
+                                        }
+                                        $tags_html .= $content . '.<br>';
+                                    }
+                                } else {
+                                    // If it's a simple string, prepend a comma instead of a period
+                                    $tags_html .= ' _ ' . htmlspecialchars($tag) . '<br>';
+                                }
+                            }
+
+
+
+
+                            $rate=[
+                                'id' => $code,
+                                'label' =>
+                                    "<strong>{$newMethod['mode']}</strong>: {$newMethod['duration']} _Receiver will be required to pay customs clearance charges"
+                                ,//__($newMethod['mode'].": ".$newMethod['duration'], 'woocommerce') ,// 'Top Ship',
+                                'cost' =>  round( ($totalPrice/100)/$currency_rate,2), // 50.00 in the currency
+                                'description' =>__('Delivery within 3-5 business days.'.$newMethod['duration'], 'woocommerce'),
+                            ];
+                            $rates[]= $rate;
+                            // Start the session if not already started
+                            if (session_status() === PHP_SESSION_NONE) {
+                                session_start();
+                            }
+
+                            // Save the rate details in the session
+                            if (!isset($_SESSION['topship_shipping_rates'])) {
+                                $_SESSION['topship_shipping_rates'] = [];
+                            }
+
+                            // Add the rate to the session array
+                            $_SESSION['topship_shipping_rates'][$code] = $rate;
+                        }
+                    }
+                    elseif ($method['pricingTier']=='Aramex'){
+                        if($data->shipmentDetail->totalWeight>=100){
+                            $newMethod=Class_topship_helper::getNameDescription($method);
+                            $newPrice =$method['cost'];
+                            $code =$checkout_session_id. $method['pricingTier'];//ValueAddedTaxes_Table::generate_unique_code($method['pricingTier']);
+                            //Log::info('currency: '.$currency);
+                            $valueAddedTax = ceil(Class_topship_helper::value_Added_Tax_Charge($newPrice));
+                            $totalPrice=$newPrice+$valueAddedTax;
+                            ValueAddedTaxes_Table::createValueAddedTax($valueAddedTax,2000,'',$method['cost'],'',$method['pricingTier'],'',$code);
+                            // $rates[]=
+
+                            $tags_html = '';
+                            foreach ($method['tags'] as $tag) {
+                                // Check if it's JSON
+                                $decodedTag = json_decode($tag, true);
+                                if ($decodedTag) {
+                                    foreach ($decodedTag as $element) {
+                                        $content = '';
+                                        foreach ($element['content'] as $subContent) {
+                                            if ($subContent['type'] === 'text') {
+                                                if(strlen( $subContent['content'])<18)
+                                                    $content .= '  ' . htmlspecialchars($subContent['content']);
+                                                else
+                                                    $content .= ' _ ' . htmlspecialchars($subContent['content']);
+                                            } elseif ($subContent['type'] === 'strong') {
+                                                $content .= '_  <strong>' . htmlspecialchars($subContent['content'][0]['content']) . '</strong>';
+                                            }
+                                        }
+                                        $tags_html .= $content . '.<br>';
+                                    }
+                                } else {
+                                    // If it's a simple string, prepend a comma instead of a period
+                                    $tags_html .= ' _ ' . htmlspecialchars($tag) . '<br>';
+                                }
+                            }
+
+
+
+
+                            $rate=[
+                                'id' => $code,
+                                'label' =>
+                                    "<strong>{$newMethod['mode']}</strong>: {$newMethod['duration']} _Receiver will be required to pay customs clearance charges"
+                                ,//__($newMethod['mode'].": ".$newMethod['duration'], 'woocommerce') ,// 'Top Ship',
+                                'cost' =>  round( ($totalPrice/100)/$currency_rate,2), // 50.00 in the currency
+                                'description' =>__('Delivery within 3-5 business days.'.$newMethod['duration'], 'woocommerce'),
+                            ];
+                            $rates[]= $rate;
+                            // Start the session if not already started
+                            if (session_status() === PHP_SESSION_NONE) {
+                                session_start();
+                            }
+
+                            // Save the rate details in the session
+                            if (!isset($_SESSION['topship_shipping_rates'])) {
+                                $_SESSION['topship_shipping_rates'] = [];
+                            }
+
+                            // Add the rate to the session array
+                            $_SESSION['topship_shipping_rates'][$code] = $rate;
+                        }
                     }
                     else{
-
-                      /*  $newMethod=Class_topship_helper::getNameDescription($method);
+                        $newMethod=Class_topship_helper::getNameDescription($method);
                         $newPrice =$method['cost'];
                         $code =$checkout_session_id. $method['pricingTier'];
                         //Log::info('currency: '.$currency);
                         $valueAddedTax = ceil(Class_topship_helper::value_Added_Tax_Charge($newPrice));
                         $totalPrice=$newPrice+$valueAddedTax;
                         ValueAddedTaxes_Table::createValueAddedTax($valueAddedTax,2000,'',$method['cost'],'',$method['pricingTier'],'',$code);
-                        $rates[]=
+                        //$rates[]=
+
+                        $tags_html = '';
+                        foreach ($method['tags'] as $tag) {
+                            // Check if it's JSON
+                            $decodedTag = json_decode($tag, true);
+                            if ($decodedTag) {
+                                foreach ($decodedTag as $element) {
+                                    $content = '';
+                                    foreach ($element['content'] as $subContent) {
+                                        if ($subContent['type'] === 'text') {
+                                            if(strlen( $subContent['content'])<18)
+                                                $content .= '  ' . htmlspecialchars($subContent['content']);
+                                            else
+                                                $content .= ' _ ' . htmlspecialchars($subContent['content']);
+                                        } elseif ($subContent['type'] === 'strong') {
+                                            $content .= '_  <strong>' . htmlspecialchars($subContent['content'][0]['content']) . '</strong>';
+                                        }
+                                    }
+                                    $tags_html .= $content . '.<br>';
+                                }
+                            } else {
+                                // If it's a simple string, prepend a comma instead of a period
+                                $tags_html .= ' _ ' . htmlspecialchars($tag) . '<br>';
+                            }
+                        }
 
                         $rate=[
                             'id' => $code,
-                            'label' =>__($newMethod['mode'], 'woocommerce') ,// 'Top Ship',
-                            'cost' => $totalPrice/100, // 50.00 in the currency
-                            'description' =>__($newMethod['duration'], 'woocommerce'),
+                            'label' =>
+                                "<strong>{$newMethod['mode']}</strong>: {$newMethod['duration']}"
+                            ,//__($newMethod['mode'].": ".$newMethod['duration'], 'woocommerce') ,// 'Top Ship',
+                            'cost' => round( ($totalPrice/100)/$currency_rate,2), // 50.00 in the currency
+                            'description' =>__( $newMethod['duration'], 'woocommerce'),
                         ];
                         $rates[]= $rate;
-                        // Start the session if not already started
 
-
-                        // Save the rate details in the session
-                        //if (!isset($_SESSION['topship_shipping_rates'])) {
-
-                        //}
-
-
-                        // Add the rate to the session array
-                        $_SESSION['topship_shipping_rates'][$code] = $rate;*/
-
+                        $_SESSION['topship_shipping_rates'][$code] = $rate;
                     }
                 }
                 foreach ($rates as $option) {
@@ -321,6 +572,7 @@ if (!class_exists('Topship_Shipping_Method')) {
                         'id'    => $option['id'],
                         'label' => $option['label'],
                         'cost'  => $option['cost'],
+                        'description'=>$option['description'],
                         // Optionally include meta data
                         'meta_data' => [
                             'description' => $option['description'],

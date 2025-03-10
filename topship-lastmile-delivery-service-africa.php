@@ -42,10 +42,7 @@ class topshipLastMileDeliveryServiceAfrica {
 
         add_action('woocommerce_thankyou', [$this,'handle_topship_checkout_submission']);
 
-        add_action('woocommerce_checkout_create_order', [$this,'handle_topship_checkout_create_order']);
 
-
-        /* add_action('woocommerce_checkout_order_processed', [this,'handle_topship_checkout_submission']);*/
 
         add_action('wp_enqueue_scripts', [$this, 'enqueue_topship_shipping_scripts']);
 
@@ -58,7 +55,79 @@ class topshipLastMileDeliveryServiceAfrica {
         });
 
         TableManager::initialize_tables();
-       // Topship_Registration_Table::init();
+
+
+        add_action('wp_footer', function () {
+            if (!is_page() || (!strpos($_SERVER['REQUEST_URI'], 'cart') && !strpos($_SERVER['REQUEST_URI'], 'checkout'))) {
+                return; // Exit if not on the cart or checkout page
+            }
+            ?>
+            <style>
+                .wc-block-components-radio-control__label {
+
+                    padding: 5px;
+                    border-radius: 5px;
+                    display: inline-block;
+                    white-space:pre-line;
+                }
+                .wc-block-components-radio-control__label {
+                    white-space: pre-line; /* Preserve line breaks in content */
+                }
+
+                /* Adding a line break after the hyphen */
+                .wc-block-components-radio-control__label::after {
+                    content: "\A"; /* This creates a line break */
+                    white-space: pre; /* Preserve new lines*/
+                }
+            </style>
+            <script>
+                jQuery(document).ready(function ($) {
+                    console.log("Shipping method label modification script loaded!");
+
+                    function replaceUnderscoresWithLineBreaks(selector) {
+                        let elements = $(selector);
+                        elements.each(function () {
+                            let text = $(this).html();
+                            let updatedText = text.replace(/_(?!\s?\d{1,2}[:.]?\d{2}\s?(a\.m\.|p\.m\.|A\.M\.|P\.M\.))/gi, '<br>');
+
+                            if (text !== updatedText) {
+                                $(this).html(updatedText); // Update only if changes were made
+                            }
+                        });
+                    }
+
+                    // Run initially
+                    replaceUnderscoresWithLineBreaks(".wc-block-components-radio-control__label");
+                    replaceUnderscoresWithLineBreaks(".wc-block-components-totals-shipping__via");
+
+                    // Setup MutationObserver with a safeguard to prevent infinite loops
+                    let observer = new MutationObserver((mutations, obs) => {
+                        let foundChanges = false;
+
+                        mutations.forEach(mutation => {
+                            if (mutation.type === "childList" || mutation.type === "subtree") {
+                                foundChanges = true;
+                            }
+                        });
+
+                        if (foundChanges) {
+                            observer.disconnect(); // Prevent recursive triggering
+                            replaceUnderscoresWithLineBreaks(".wc-block-components-radio-control__label");
+                            replaceUnderscoresWithLineBreaks(".wc-block-components-totals-shipping__via");
+                            observer.observe(document.body, { childList: true, subtree: true }); // Re-enable after changes
+                        }
+                    });
+
+                    observer.observe(document.body, { childList: true, subtree: true });
+                });
+            </script>
+
+
+            <?php
+        });
+
+
+        // Topship_Registration_Table::init();
         //Topship_Registration_Table::create_table();
         //ValueAddedTaxes_Table::init();
         // ShipmentBookingsTable::init();
@@ -70,6 +139,8 @@ class topshipLastMileDeliveryServiceAfrica {
         //ValueAddedTaxes_Table::create_table();
         //register_activation_hook(__FILE__, ['Topship_Registration_Table', 'create_table']);
     }
+
+
 
     public function init_shipping_method() {
         include_once 'class-topship-shipping-method.php';
@@ -552,17 +623,21 @@ class topshipLastMileDeliveryServiceAfrica {
             error_log('No shipping rates found in session.');
             return;
         }
+
+
         error_log('Shipping Rates: ' . json_encode($rates));
 
         // Match shipping method with a rate
         $matched_rate = null;
         foreach ($shipping_methods as $method) {
-            $method_title = $method->get_method_title();
+            $method_title =explode(':', $method->get_method_title())[0];
+            error_log('method Label: ' . json_encode($method_title));
             foreach ($rates as $rate) {
-                if (isset($rate['label']) && $rate['label'] === $method_title) {
+                if (isset($rate['label']) && stripos($rate['label'], $method_title) !== false) {
                     $matched_rate = $rate;
                     break 2;
                 }
+
             }
         }
 

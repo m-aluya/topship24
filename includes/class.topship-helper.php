@@ -4,6 +4,7 @@ class Class_topship_helper{
 
     //public static $TOPSHIP_BASE_URL = 'https://topship-staging.africa/api';//
     public static $TOPSHIP_BASE_URL = 'https://api-topship.com/api';
+    public static $TOPSHIP_BASE_URL1 = 'https://api-topship.com';
 
     private static function topshipLink(){
         return 'topship-africa-admin-page-01-ba5e0604-954d-4d49-b43e-61ac97f3eb75';
@@ -246,6 +247,57 @@ class Class_topship_helper{
             return null; // Login failed
         } catch (Exception $e) {
             error_log('Topship login error: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    public static function convertFromServer($from,  $amount)
+    {
+        $to  = get_woocommerce_currency();
+
+        error_log( "The current WooCommerce checkout currency is: $to");
+
+
+        $url = self::$TOPSHIP_BASE_URL1 .'/rate-converter';
+        //$to="USD";
+        try {
+            // If converting from NGN (Kobo), divide by 100 to get NGN value
+            if ($from === 'KOBO') {
+                $amount /= 100;
+                $from="NGN";
+            }
+
+            if ($from == $to) return 1;
+
+            // Prepare query parameters
+            $query = http_build_query([
+                'from'   => $from,
+                'to'     => $to,
+                'amount' => $amount,
+            ]);
+
+            // Send GET request using WordPress HTTP API
+            $response = wp_remote_get("$url?$query");
+
+            // Check for errors
+            if (is_wp_error($response)) {
+                error_log('Currency conversion request failed: ' . $response->get_error_message());
+                return null;
+            }
+
+            // Decode the JSON response
+            $data = json_decode(wp_remote_retrieve_body($response), true);
+            error_log(json_encode( $data));
+            // Check if the response contains the final amount
+            if (isset($data['rate'])) {
+                return $data['rate'];
+            } else {
+                error_log('Currency conversion response missing finalAmount: ' . print_r($data, true));
+                return null;
+            }
+
+        } catch (Exception $e) {
+            error_log('Error during currency conversion: ' . $e->getMessage());
             return null;
         }
     }
