@@ -42,10 +42,7 @@ class topshipLastMileDeliveryServiceAfrica {
 
         add_action('woocommerce_thankyou', [$this,'handle_topship_checkout_submission']);
 
-        add_action('woocommerce_checkout_create_order', [$this,'handle_topship_checkout_create_order']);
 
-
-        /* add_action('woocommerce_checkout_order_processed', [this,'handle_topship_checkout_submission']);*/
 
         add_action('wp_enqueue_scripts', [$this, 'enqueue_topship_shipping_scripts']);
 
@@ -70,6 +67,8 @@ class topshipLastMileDeliveryServiceAfrica {
         //ValueAddedTaxes_Table::create_table();
         //register_activation_hook(__FILE__, ['Topship_Registration_Table', 'create_table']);
     }
+
+
 
     public function init_shipping_method() {
         include_once 'class-topship-shipping-method.php';
@@ -604,7 +603,7 @@ class topshipLastMileDeliveryServiceAfrica {
                 "description" => $item->get_name(),
                 "weight" => $item->get_meta('weight', true) ?: 1, // Example: Adjust weight logic as needed
                 "quantity" => (float)$item->get_quantity(),
-                "value" => (float)$item->get_total(),
+                "value" => round($item->get_total(), 2),
             ];
         }
         error_log('Order Items: ' . json_encode($items));
@@ -640,7 +639,7 @@ class topshipLastMileDeliveryServiceAfrica {
             return;
         }
         // Send payload to Topship API
-        $url = 'https://topship-staging.africa/api/save-shipment';
+        $url =Class_topship_helper::$TOPSHIP_BASE_URL. '/save-shipment';
         try {
             $response = wp_remote_post(
                 $url,

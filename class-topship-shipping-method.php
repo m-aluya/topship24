@@ -6,6 +6,7 @@ require_once plugin_dir_path(__FILE__) . 'includes/class.topship-db-init-service
 if (!class_exists('Topship_Shipping_Method')) {
     class Topship_Shipping_Method extends WC_Shipping_Method {
         public function __construct() {
+            error_reporting(E_ALL & ~E_WARNING);
             $this->id                 = 'topship_last_mile';
             $this->method_title       = __('Topship Last Mile Delivery', 'woocommerce');
             $this->method_description = __('Delivery service across Africa using Topship.', 'woocommerce');
@@ -30,7 +31,7 @@ if (!class_exists('Topship_Shipping_Method')) {
 
             //add_filter('woocommerce_checkout_fields', [self::class, 'ensure_postcode_checkout_field']);
 
-            error_log('init is running');
+            //error_log('init is running');
             //Save settings
             //add_action('woocommerce_update_options_shipping_' . $this->id, [$this, 'process_admin_options']);
             add_filter('woocommerce_checkout_fields', [$this,'ensure_postcode_checkout_field']);
@@ -38,14 +39,38 @@ if (!class_exists('Topship_Shipping_Method')) {
 
             $fields = apply_filters('woocommerce_checkout_fields', WC()->checkout->get_checkout_fields());
 
+            /*add_action('woocommerce_after_order_notes', 'add_custom_checkout_field');
+            add_action('woocommerce_checkout_process', 'validate_custom_checkout_field');
+            add_action('woocommerce_checkout_update_order_meta', 'save_custom_checkout_field');*/
+
             //var_dump($fields);
             //Modify the postal code directly
             //$fields['billing']['billing_postcode']['required'] = true;
-
             //Now, update the checkout fields (if needed)
             //WC()->checkout->set_checkout_fields($fields);
+        }
 
+        function validate_custom_checkout_field() {
+            if (!$_POST['delivery_instructions']) {
+                wc_add_notice(__('Please enter delivery instructions.'), 'error');
+            }
+        }
 
+        function save_custom_checkout_field($order_id) {
+            if (!empty($_POST['delivery_instructions'])) {
+                update_post_meta($order_id, 'delivery_instructions', sanitize_text_field($_POST['delivery_instructions']));
+            }
+        }
+
+        function add_custom_checkout_field($checkout) {
+            echo '<div id="custom_checkout_field"><h3>' . __('Additional Information') . '</h3>';
+            woocommerce_form_field('delivery_instructions', array(
+                'type'        => 'textarea',
+                'class'       => array('form-row-wide'),
+                'label'       => __('Delivery Instructions'),
+                'placeholder' => __('Enter specific delivery instructions here...'),
+            ), $checkout->get_value('delivery_instructions'));
+            echo '</div>';
         }
 
        public  function ensure_postcode_checkout_field($fields) {
@@ -109,6 +134,8 @@ if (!class_exists('Topship_Shipping_Method')) {
         }
         public function calculate_shipping($package = []) {
 
+          $currency_rate=  Class_topship_helper::convertFromServer("KOBO",100);
+          error_log('currency_rate: '.$currency_rate);
             // Get checkout session ID (example implementation)
             $checkout_session_id = WC()->session->get('order_awaiting_payment'); // WooCommerce session data
             if (!$checkout_session_id) {
@@ -138,8 +165,22 @@ if (!class_exists('Topship_Shipping_Method')) {
             error_log("reg: ". json_encode($reg));
 
 
+            // Calculate total weight of the package
+            $total_weight = 0;
+            foreach ($package['contents'] as $item_id => $item) {
+                $product = $item['data']; // Get the product object
+                if ($product) {
+                    $item_weight = $product->get_weight()?: 1; // Get the weight of each item in the package
+                    $total_weight += $item_weight * $item['quantity']; // Add weight based on quantity
+                }
+            }
 
 
+            if(($total_weight/count($package['contents']))>1){
+                //$total_weight=$total_weight/1000;
+            }
+            if($reg==null)return[];
+           // $total_weight=100;
             $resq='{
               "shipmentDetail": {
                 "senderDetails": {
@@ -152,11 +193,11 @@ if (!class_exists('Topship_Shipping_Method')) {
                   "countryCode": "' . $user_country . '",
                   "postalCode": "'.$user_postcode.'"
                 },
-                "totalWeight": 1
+                "totalWeight": '.$total_weight.'
               }
             }';
 
-            error_log("data: ". json_encode($resq));
+            error_log("data: ". $resq);
 
             $data = json_decode( $resq);
 
@@ -164,17 +205,50 @@ if (!class_exists('Topship_Shipping_Method')) {
 
             error_log("res: ". json_encode( $res));
 
-
-            if($res){
+            if($currency_rate==null)$res=null;
+            if($res ){
                 //dd($res[0]);
                 //$res= json_decode($res);
                 $rates = [];
+
                 $_SESSION['topship_shipping_rates'] = [];
                 foreach($res as $key => $method){
 
                     if($method['pricingTier']=='LastMileBudget')
                     {
-                        if($data->shipmentDetail->totalWeight/1000>=10){
+                        if(strtolower( $reg['country_code'] )=='us'){
+                            if($data->shipmentDetail->totalWeight>=10){
+                                $newMethod=Class_topship_helper::getNameDescription($method);
+                                $newPrice =$method['cost'];
+                                $code =$checkout_session_id. $method['pricingTier'];//ValueAddedTaxes_Table::generate_unique_code($method['pricingTier']);
+                                //Log::info('currency: '.$currency);
+                                $valueAddedTax = ceil(Class_topship_helper::value_Added_Tax_Charge($newPrice));
+                                $totalPrice=$newPrice+$valueAddedTax;
+                                ValueAddedTaxes_Table::createValueAddedTax($valueAddedTax,2000,'',$method['cost'],'',$method['pricingTier'],'',$code);
+                                $rates[]=
+
+                                $rate=[
+                                    'id' => $code,
+                                    'label' =>__($newMethod['mode'].": ".$newMethod['duration'], 'woocommerce') ,// 'Top Ship',
+                                    'cost' =>  round( ($totalPrice/100)/$currency_rate,2), // 50.00 in the currency
+                                    'description' =>__('Delivery within 3-5 business days.'.$newMethod['duration'], 'woocommerce'),
+                                ];
+                                $rates[]= $rate;
+                                // Start the session if not already started
+                                if (session_status() === PHP_SESSION_NONE) {
+                                    session_start();
+                                }
+
+                                // Save the rate details in the session
+                                if (!isset($_SESSION['topship_shipping_rates'])) {
+                                    $_SESSION['topship_shipping_rates'] = [];
+                                }
+
+                                // Add the rate to the session array
+                                $_SESSION['topship_shipping_rates'][$code] = $rate;
+                            }
+
+                        }else{
                             $newMethod=Class_topship_helper::getNameDescription($method);
                             $newPrice =$method['cost'];
                             $code =$checkout_session_id. $method['pricingTier'];//ValueAddedTaxes_Table::generate_unique_code($method['pricingTier']);
@@ -186,9 +260,9 @@ if (!class_exists('Topship_Shipping_Method')) {
 
                             $rate=[
                                 'id' => $code,
-                                'label' =>__($newMethod['mode'], 'woocommerce') ,// 'Top Ship',
-                                'cost' => $totalPrice/100, // 50.00 in the currency
-                                'description' =>__($newMethod['duration'], 'woocommerce'),
+                                'label' =>__($newMethod['mode'].": ".$newMethod['duration'], 'woocommerce') ,// 'Top Ship',
+                                'cost' => round( ($totalPrice/100)/$currency_rate,2), // 50.00 in the currency
+                                'description' =>__('Delivery within 3-5 business days.'.$newMethod['duration'], 'woocommerce'),
                             ];
                             $rates[]= $rate;
                             // Start the session if not already started
@@ -204,8 +278,9 @@ if (!class_exists('Topship_Shipping_Method')) {
                             // Add the rate to the session array
                             $_SESSION['topship_shipping_rates'][$code] = $rate;
                         }
-                    }else{
+                    }
 
+                    elseif ($method['pricingTier']=='Express'){
                         $newMethod=Class_topship_helper::getNameDescription($method);
                         $newPrice =$method['cost'];
                         $code =$checkout_session_id. $method['pricingTier'];
@@ -217,9 +292,9 @@ if (!class_exists('Topship_Shipping_Method')) {
 
                         $rate=[
                             'id' => $code,
-                            'label' =>__($newMethod['mode'], 'woocommerce') ,// 'Top Ship',
-                            'cost' => $totalPrice/100, // 50.00 in the currency
-                            'description' =>__($newMethod['duration'], 'woocommerce'),
+                            'label' =>__($newMethod['mode'].": ".$newMethod['duration'], 'woocommerce') ,// 'Top Ship',
+                            'cost' => round( ($totalPrice/100)/$currency_rate,2), // 50.00 in the currency
+                            'description' =>__( $newMethod['duration'], 'woocommerce'),
                         ];
                         $rates[]= $rate;
                         // Start the session if not already started
@@ -233,6 +308,10 @@ if (!class_exists('Topship_Shipping_Method')) {
 
                         // Add the rate to the session array
                         $_SESSION['topship_shipping_rates'][$code] = $rate;
+                    }
+                    else{
+
+
 
                     }
                 }
@@ -241,6 +320,7 @@ if (!class_exists('Topship_Shipping_Method')) {
                         'id'    => $option['id'],
                         'label' => $option['label'],
                         'cost'  => $option['cost'],
+                        'description'=>$option['description'],
                         // Optionally include meta data
                         'meta_data' => [
                             'description' => $option['description'],
@@ -251,7 +331,8 @@ if (!class_exists('Topship_Shipping_Method')) {
                 }
                 //Log::info('rate',$rates);
                 // return response()->json(['rates' => $rates]);
-            }else {
+            }
+            else {
 
                 $shipping_options = [
                     [
@@ -285,7 +366,7 @@ if (!class_exists('Topship_Shipping_Method')) {
                             'description' => $option['description'],
                         ],
                     ];
-                    $this->add_rate($rate);
+                    //$this->add_rate($rate);
                 }
             }
         }
